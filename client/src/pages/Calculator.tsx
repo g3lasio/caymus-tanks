@@ -281,8 +281,9 @@ const Calculator = () => {
           
           {/* Error Message */}
           {error && (
-            <div className="mb-4 p-2 bg-red-50 text-red-600 border border-red-200 rounded">
-              {error}
+            <div className="mb-4 p-2 bg-red-950/50 text-red-400 border border-red-500/30 rounded-md flex items-start">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 mt-0.5 flex-shrink-0"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+              <span>{error}</span>
             </div>
           )}
           
@@ -290,68 +291,68 @@ const Calculator = () => {
           <div className="flex flex-wrap gap-3 mb-4">
             <Button 
               onClick={handleCalculate}
-              className="bg-wine-600 hover:bg-wine-700 text-white"
+              className="bg-accent hover:bg-accent/80 text-black font-mono uppercase tracking-wider text-sm flex items-center"
             >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2"><path d="M3 3v18h18"/><path d="m21 3-9 9"/><path d="m21 9-9 9-3-3 9-9"/><path d="m9 15-3 3"/></svg>
               Calcular
             </Button>
             <Button 
               onClick={handleReset}
               variant="outline"
-              className="border-gray-300 text-gray-700 hover:bg-gray-100"
+              className="border-accent/40 text-accent hover:bg-accent/10 font-mono uppercase tracking-wider text-sm flex items-center"
             >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
               Resetear
             </Button>
           </div>
           
           {/* Results Display with Tank Visual */}
           {result && (
-            <div className="mt-4 p-4 bg-vineyard-50 rounded-lg border border-vineyard-200">
-              <h3 className="text-lg font-semibold text-vineyard-800 mb-3">Resultado</h3>
+            <div className="mt-4 p-4 bg-secondary/30 rounded-lg border border-accent/30 backdrop-blur-sm">
+              <h3 className="text-lg font-mono text-accent mb-3 flex items-center">
+                <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-accent mr-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-black"><polyline points="20 6 9 17 4 12"/></svg>
+                </span>
+                Resultado
+              </h3>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Results Data */}
-                <div>
+                <div className="bg-card/50 rounded-lg border border-accent/20 p-3">
                   {isSpaceToGallons(result) && (
-                    <div className="grid grid-cols-1 gap-2">
-                      <div>
-                        <p className="text-sm text-gray-600">Galones en Cuerpo Principal:</p>
-                        <p className="font-medium text-lg">{formatNumber(result.mainBodyGallons)}</p>
+                    <div className="grid grid-cols-1 gap-3">
+                      <div className="p-2 border-b border-accent/10">
+                        <p className="text-sm text-blue-300">Total de galones en el tanque:</p>
+                        <p className="font-mono text-xl text-white flex items-center">
+                          <span className="inline-block w-2 h-2 bg-accent rounded-full mr-2 animate-pulse"></span>
+                          {formatNumber(result.totalGallons)}
+                        </p>
                       </div>
-                      <div>
-                        <p className="text-sm text-gray-600">Galones en Sección Superior:</p>
-                        <p className="font-medium text-lg">{formatNumber(result.topSectionGallons)}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-600">Galones Totales en Tanque:</p>
-                        <p className="font-bold text-xl text-vineyard-700">{formatNumber(result.totalGallons)}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-600">Galones Restantes:</p>
-                        <p className="font-bold text-xl text-wine-700">{formatNumber(result.remainingGallons)}</p>
+                      <div className="p-2">
+                        <p className="text-sm text-blue-300">Galones restantes:</p>
+                        <p className="font-mono text-xl text-white flex items-center">
+                          <span className="inline-block w-2 h-2 bg-accent rounded-full mr-2 animate-pulse"></span>
+                          {formatNumber(result.remainingGallons)}
+                        </p>
                       </div>
                     </div>
                   )}
                   
                   {isGallonsToSpace(result) && (
-                    <div className="grid grid-cols-1 gap-2">
-                      <div>
-                        <p className="text-sm text-gray-600">Pulgadas de Espacio Requeridas:</p>
-                        <p className="font-bold text-xl text-wine-700">{formatNumber(result.requiredSpace)}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-600">Pulgadas en Cuerpo Principal:</p>
-                        <p className="font-medium text-lg">{formatNumber(result.mainBodyInches)}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-600">Pulgadas en Sección Superior:</p>
-                        <p className="font-medium text-lg">{formatNumber(result.topSectionInches)}</p>
+                    <div className="grid grid-cols-1 gap-3">
+                      <div className="p-2">
+                        <p className="text-sm text-blue-300">Espacio requerido (en pulgadas):</p>
+                        <p className="font-mono text-xl text-white flex items-center">
+                          <span className="inline-block w-2 h-2 bg-accent rounded-full mr-2 animate-pulse"></span>
+                          {formatNumber(result.requiredSpace)}
+                        </p>
                       </div>
                     </div>
                   )}
                 </div>
                 
                 {/* Tank Visualization */}
-                <div className="flex items-center justify-center">
+                <div className="flex items-center justify-center bg-gradient-to-b from-secondary/30 to-black/30 rounded-lg border border-accent/20 p-2">
                   {isSpaceToGallons(result) && (
                     <TankVisual 
                       fillPercentage={result.fillPercentage}
@@ -374,9 +375,9 @@ const Calculator = () => {
       </main>
 
       {/* Footer */}
-      <footer className="bg-wine-800 text-white py-3 mt-auto">
+      <footer className="bg-gradient-to-r from-indigo-900 to-primary text-white py-3 mt-auto border-t border-accent/30">
         <div className="container mx-auto px-3 text-center">
-          <p>&copy; {new Date().getFullYear()} Caymus Calculator. All rights reserved.</p>
+          <p className="font-mono text-xs tracking-wider opacity-80">&copy; {new Date().getFullYear()} <span className="text-accent">CAYMUS</span> CALCULATOR v2.0</p>
         </div>
       </footer>
     </div>

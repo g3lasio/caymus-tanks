@@ -38,23 +38,49 @@ const TankVisual = ({
     >
       <div 
         ref={tankRef}
-        className="w-full h-64 border-2 border-oak-400 rounded-lg tank-fill mx-auto mb-2 overflow-hidden relative" 
+        className="w-full h-64 border-2 border-accent/50 rounded-lg tank-fill mx-auto mb-2 overflow-hidden relative bg-black/20 backdrop-blur-sm" 
         style={{ '--fill-height': `${boundedFillPercentage}%` } as React.CSSProperties}
       >
-        <div className="h-full flex flex-col justify-between p-4">
-          <div className="text-center text-oak-700 text-sm">
-            {showLabels && "Espacio Vacío"}
+        {/* Grid background */}
+        <div className="absolute inset-0 opacity-10" 
+             style={{
+               backgroundImage: 'linear-gradient(to right, rgba(30, 144, 255, 0.5) 1px, transparent 1px), linear-gradient(to bottom, rgba(30, 144, 255, 0.5) 1px, transparent 1px)',
+               backgroundSize: '20px 20px'
+             }}>
+        </div>
+        
+        <div className="h-full flex flex-col justify-between p-4 relative z-10">
+          <div className="text-center font-mono text-blue-300 text-xs tracking-wider flex flex-col items-center">
+            {showLabels && (
+              <>
+                <span className="text-accent mb-1">ESPACIO</span>
+                <div className="px-2 py-1 bg-secondary/40 rounded-sm border border-accent/20 w-16 text-center">
+                  {(100 - boundedFillPercentage).toFixed(1)}%
+                </div>
+              </>
+            )}
           </div>
-          <div className="text-center text-white font-bold z-10 text-lg shadow-sm">
-            {boundedFillPercentage.toFixed(1)}% Lleno
+          
+          <div className="text-center text-white font-mono font-bold z-10 text-lg shadow-sm bg-secondary/50 rounded-md border border-accent/20 py-2 px-3">
+            <span className="text-accent mr-1">LLENO</span> {boundedFillPercentage.toFixed(1)}%
           </div>
         </div>
         
-        {/* Wine bottle decoration */}
-        <div className="absolute bottom-1 right-1 opacity-20">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 2C12 2 14 5 14 8C14 10 13 11 12.5 13C12 15 12 19 12 19M12 2C12 2 10 5 10 8C10 10 11 11 11.5 13C12 15 12 19 12 19M12 19C9 19 7 17.5 7 15.5C7 13.5 8 12 9.5 9.5C11 7 9 4 9 4M12 19C15 19 17 17.5 17 15.5C17 13.5 16 12 14.5 9.5C13 7 15 4 15 4" 
-                  stroke="#8A3541" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        {/* Digital measurement lines */}
+        <div className="absolute left-0 h-full w-5 flex flex-col justify-between py-2 opacity-70">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="flex items-center">
+              <div className="h-px w-3 bg-accent"></div>
+              <div className="text-accent font-mono text-[8px]">{100 - i * 25}</div>
+            </div>
+          ))}
+        </div>
+        
+        {/* Wine tank icon */}
+        <div className="absolute top-2 right-2 text-accent/40">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20 10v12h-3M4 22h3V10M14 22H10M12 2v7M12 9L4 10M12 9l8 1M7 2h10" 
+                  stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </div>
       </div>
@@ -63,15 +89,15 @@ const TankVisual = ({
       {(gallonsTotal !== undefined || gallonsRemaining !== undefined) && (
         <div className="grid grid-cols-2 gap-2 text-sm mt-1">
           {gallonsTotal !== undefined && (
-            <div className="flex justify-between items-center p-1 bg-vineyard-50 rounded border border-vineyard-200">
-              <span className="text-vineyard-800">Total:</span>
-              <span className="font-medium text-vineyard-700">{formatNumber(gallonsTotal)} gal</span>
+            <div className="flex justify-between items-center p-1 bg-secondary/30 rounded border border-accent/20">
+              <span className="text-blue-300 font-mono text-xs">TOTAL:</span>
+              <span className="font-mono text-white">{formatNumber(gallonsTotal)}</span>
             </div>
           )}
           {gallonsRemaining !== undefined && (
-            <div className="flex justify-between items-center p-1 bg-wine-50 rounded border border-wine-200">
-              <span className="text-wine-800">Restante:</span>
-              <span className="font-medium text-wine-700">{formatNumber(gallonsRemaining)} gal</span>
+            <div className="flex justify-between items-center p-1 bg-secondary/30 rounded border border-accent/20">
+              <span className="text-blue-300 font-mono text-xs">RESTANTE:</span>
+              <span className="font-mono text-white">{formatNumber(gallonsRemaining)}</span>
             </div>
           )}
         </div>
