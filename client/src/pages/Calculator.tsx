@@ -164,33 +164,29 @@ const Calculator = () => {
             )}
           </div>
           
-          {/* Tank Visualization & Specifications */}
+          {/* Tank Specifications */}
           {selectedTank && (
             <div className="mb-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="p-3 bg-oak-50 rounded-lg border border-oak-200 mb-3">
-                  <h3 className="text-lg font-semibold text-oak-800 mb-2">Especificaciones</h3>
-                  <div className="grid grid-cols-2 gap-2 text-sm">
-                    <div className="flex justify-between">
-                      <span>Galones/Pulgada:</span>
-                      <span className="font-medium">{selectedTank.GALS_PER_INCH.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Galones en Tope:</span>
-                      <span className="font-medium">{selectedTank.GALS_IN_TOP.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Pulgadas en Tope:</span>
-                      <span className="font-medium">{selectedTank.TOP_INCHES.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Galones Totales:</span>
-                      <span className="font-medium">{selectedTank.TOTAL_GALS.toFixed(2)}</span>
-                    </div>
+              <div className="p-3 bg-oak-50 rounded-lg border border-oak-200">
+                <h3 className="text-lg font-semibold text-oak-800 mb-2">Especificaciones</h3>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div className="flex justify-between">
+                    <span>Galones/Pulgada:</span>
+                    <span className="font-medium">{selectedTank.GALS_PER_INCH.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Galones en Tope:</span>
+                    <span className="font-medium">{selectedTank.GALS_IN_TOP.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Pulgadas en Tope:</span>
+                    <span className="font-medium">{selectedTank.TOP_INCHES.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Galones Totales:</span>
+                    <span className="font-medium">{selectedTank.TOTAL_GALS.toFixed(2)}</span>
                   </div>
                 </div>
-                
-                <TankVisual fillPercentage={fillPercentage} />
               </div>
             </div>
           )}
@@ -289,48 +285,71 @@ const Calculator = () => {
             </Button>
           </div>
           
-          {/* Results Display */}
+          {/* Results Display with Tank Visual */}
           {result && (
             <div className="mt-4 p-4 bg-vineyard-50 rounded-lg border border-vineyard-200">
-              <h3 className="text-lg font-semibold text-vineyard-800 mb-2">Resultado</h3>
+              <h3 className="text-lg font-semibold text-vineyard-800 mb-3">Resultado</h3>
               
-              {isSpaceToGallons(result) && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <p className="text-sm text-gray-600">Galones en Cuerpo Principal:</p>
-                    <p className="font-medium text-lg">{formatNumber(result.mainBodyGallons)}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Galones en Sección Superior:</p>
-                    <p className="font-medium text-lg">{formatNumber(result.topSectionGallons)}</p>
-                  </div>
-                  <div className="col-span-1 sm:col-span-2">
-                    <p className="text-sm text-gray-600">Galones Totales en Tanque:</p>
-                    <p className="font-bold text-xl text-vineyard-700">{formatNumber(result.totalGallons)}</p>
-                  </div>
-                  <div className="col-span-1 sm:col-span-2">
-                    <p className="text-sm text-gray-600">Galones Restantes:</p>
-                    <p className="font-bold text-xl text-wine-700">{formatNumber(result.remainingGallons)}</p>
-                  </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Results Data */}
+                <div>
+                  {isSpaceToGallons(result) && (
+                    <div className="grid grid-cols-1 gap-2">
+                      <div>
+                        <p className="text-sm text-gray-600">Galones en Cuerpo Principal:</p>
+                        <p className="font-medium text-lg">{formatNumber(result.mainBodyGallons)}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600">Galones en Sección Superior:</p>
+                        <p className="font-medium text-lg">{formatNumber(result.topSectionGallons)}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600">Galones Totales en Tanque:</p>
+                        <p className="font-bold text-xl text-vineyard-700">{formatNumber(result.totalGallons)}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600">Galones Restantes:</p>
+                        <p className="font-bold text-xl text-wine-700">{formatNumber(result.remainingGallons)}</p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {isGallonsToSpace(result) && (
+                    <div className="grid grid-cols-1 gap-2">
+                      <div>
+                        <p className="text-sm text-gray-600">Pulgadas de Espacio Requeridas:</p>
+                        <p className="font-bold text-xl text-wine-700">{formatNumber(result.requiredSpace)}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600">Pulgadas en Cuerpo Principal:</p>
+                        <p className="font-medium text-lg">{formatNumber(result.mainBodyInches)}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600">Pulgadas en Sección Superior:</p>
+                        <p className="font-medium text-lg">{formatNumber(result.topSectionInches)}</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
-              
-              {isGallonsToSpace(result) && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="col-span-1 sm:col-span-2">
-                    <p className="text-sm text-gray-600">Pulgadas de Espacio Requeridas:</p>
-                    <p className="font-bold text-xl text-wine-700">{formatNumber(result.requiredSpace)}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Pulgadas en Cuerpo Principal:</p>
-                    <p className="font-medium text-lg">{formatNumber(result.mainBodyInches)}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Pulgadas en Sección Superior:</p>
-                    <p className="font-medium text-lg">{formatNumber(result.topSectionInches)}</p>
-                  </div>
+                
+                {/* Tank Visualization */}
+                <div className="flex items-center justify-center">
+                  {isSpaceToGallons(result) && (
+                    <TankVisual 
+                      fillPercentage={result.fillPercentage}
+                      gallonsTotal={result.totalGallons}
+                      gallonsRemaining={result.remainingGallons}
+                    />
+                  )}
+                  
+                  {isGallonsToSpace(result) && (
+                    <TankVisual 
+                      fillPercentage={result.fillPercentage}
+                      gallonsTotal={selectedTank?.TOTAL_GALS}
+                    />
+                  )}
                 </div>
-              )}
+              </div>
             </div>
           )}
         </div>
