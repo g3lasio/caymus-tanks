@@ -1,0 +1,209 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 20 14.3% 4.1%;
+  --muted: 60 4.8% 95.9%;
+  --muted-foreground: 25 5.3% 44.7%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 20 14.3% 4.1%;
+  --card: 0 0% 100%;
+  --card-foreground: 20 14.3% 4.1%;
+  --border: 20 5.9% 90%;
+  --input: 20 5.9% 90%;
+  --primary: 346 51.1% 47.5%;  /* wine-600 */
+  --primary-foreground: 211 100% 99%;
+  --secondary: 60 4.8% 95.9%;
+  --secondary-foreground: 24 9.8% 10%;
+  --accent: 60 4.8% 95.9%;
+  --accent-foreground: 24 9.8% 10%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 60 9.1% 97.8%;
+  --ring: 346 51.1% 47.5%;  /* wine-600 */
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: 240 10% 3.9%;
+  --foreground: 0 0% 98%;
+  --muted: 240 3.7% 15.9%;
+  --muted-foreground: 240 5% 64.9%;
+  --popover: 240 10% 3.9%;
+  --popover-foreground: 0 0% 98%;
+  --card: 240 10% 3.9%;
+  --card-foreground: 0 0% 98%;
+  --border: 240 3.7% 15.9%;
+  --input: 240 3.7% 15.9%;
+  --primary: 346 51.1% 47.5%;  /* wine-600 */
+  --primary-foreground: 211 100% 99%;
+  --secondary: 240 3.7% 15.9%;
+  --secondary-foreground: 0 0% 98%;
+  --accent: 240 3.7% 15.9%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 346 51.1% 47.5%;  /* wine-600 */
+  --radius: 0.5rem;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-[#FCF7F8] text-foreground;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif;
+  }
+}
+
+/* Wine theme colors */
+@layer utilities {
+  .bg-wine-50 { background-color: #FCF7F8; }
+  .bg-wine-100 { background-color: #F5E6E8; }
+  .bg-wine-200 { background-color: #E8C5C9; }
+  .bg-wine-300 { background-color: #D99DA5; }
+  .bg-wine-400 { background-color: #C56E7B; }
+  .bg-wine-500 { background-color: #A94855; }
+  .bg-wine-600 { background-color: #8A3541; }
+  .bg-wine-700 { background-color: #6B252F; }
+  .bg-wine-800 { background-color: #4D1A21; }
+  .bg-wine-900 { background-color: #2E0F14; }
+
+  .bg-oak-50 { background-color: #FAF7F2; }
+  .bg-oak-100 { background-color: #F2EBDC; }
+  .bg-oak-200 { background-color: #E5D7B9; }
+  .bg-oak-300 { background-color: #D7C296; }
+  .bg-oak-400 { background-color: #C9AD73; }
+  .bg-oak-500 { background-color: #B69050; }
+  .bg-oak-600 { background-color: #94733F; }
+  .bg-oak-700 { background-color: #72572F; }
+  .bg-oak-800 { background-color: #503C20; }
+  .bg-oak-900 { background-color: #2E2210; }
+
+  .bg-vineyard-50 { background-color: #F6F9F6; }
+  .bg-vineyard-100 { background-color: #E7F0E7; }
+  .bg-vineyard-200 { background-color: #CEDFCE; }
+  .bg-vineyard-300 { background-color: #ACCFAD; }
+  .bg-vineyard-400 { background-color: #83B784; }
+  .bg-vineyard-500 { background-color: #5E9A60; }
+  .bg-vineyard-600 { background-color: #4B7B4C; }
+  .bg-vineyard-700 { background-color: #395D3A; }
+  .bg-vineyard-800 { background-color: #263E27; }
+  .bg-vineyard-900 { background-color: #152415; }
+
+  .text-wine-50 { color: #FCF7F8; }
+  .text-wine-100 { color: #F5E6E8; }
+  .text-wine-200 { color: #E8C5C9; }
+  .text-wine-300 { color: #D99DA5; }
+  .text-wine-400 { color: #C56E7B; }
+  .text-wine-500 { color: #A94855; }
+  .text-wine-600 { color: #8A3541; }
+  .text-wine-700 { color: #6B252F; }
+  .text-wine-800 { color: #4D1A21; }
+  .text-wine-900 { color: #2E0F14; }
+
+  .text-oak-50 { color: #FAF7F2; }
+  .text-oak-100 { color: #F2EBDC; }
+  .text-oak-200 { color: #E5D7B9; }
+  .text-oak-300 { color: #D7C296; }
+  .text-oak-400 { color: #C9AD73; }
+  .text-oak-500 { color: #B69050; }
+  .text-oak-600 { color: #94733F; }
+  .text-oak-700 { color: #72572F; }
+  .text-oak-800 { color: #503C20; }
+  .text-oak-900 { color: #2E2210; }
+
+  .text-vineyard-50 { color: #F6F9F6; }
+  .text-vineyard-100 { color: #E7F0E7; }
+  .text-vineyard-200 { color: #CEDFCE; }
+  .text-vineyard-300 { color: #ACCFAD; }
+  .text-vineyard-400 { color: #83B784; }
+  .text-vineyard-500 { color: #5E9A60; }
+  .text-vineyard-600 { color: #4B7B4C; }
+  .text-vineyard-700 { color: #395D3A; }
+  .text-vineyard-800 { color: #263E27; }
+  .text-vineyard-900 { color: #152415; }
+
+  .border-wine-200 { border-color: #E8C5C9; }
+  .border-oak-200 { border-color: #E5D7B9; }
+  .border-oak-400 { border-color: #C9AD73; }
+  .border-vineyard-200 { border-color: #CEDFCE; }
+}
+
+/* Custom animations and effects */
+@keyframes glitch {
+  0% { transform: translate(0); }
+  20% { transform: translate(-2px, 2px); }
+  40% { transform: translate(-2px, -2px); }
+  60% { transform: translate(2px, 2px); }
+  80% { transform: translate(2px, -2px); }
+  100% { transform: translate(0); }
+}
+
+.glitch-effect {
+  position: relative;
+}
+
+.glitch-effect:hover {
+  animation: glitch 0.3s linear;
+}
+
+.glitch-effect:hover::before, 
+.glitch-effect:hover::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.glitch-effect:hover::before {
+  left: 2px;
+  text-shadow: -1px 0 #a94855;
+  clip: rect(24px, 550px, 90px, 0);
+  animation: glitch-anim 2s linear alternate-reverse;
+}
+
+.glitch-effect:hover::after {
+  left: -2px;
+  text-shadow: -1px 0 #5e9a60;
+  clip: rect(85px, 550px, 140px, 0);
+  animation: glitch-anim 2s linear alternate-reverse;
+}
+
+/* Tank fill animation */
+.tank-fill {
+  position: relative;
+  overflow: hidden;
+}
+
+.tank-fill::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: var(--fill-height, 0%);
+  background: linear-gradient(to top, rgba(201, 173, 115, 0.7), rgba(169, 72, 85, 0.5));
+  border-radius: 0 0 0.5rem 0.5rem;
+  transition: height 1s ease-in-out;
+}
+
+/* Tank search no-match styling */
+.no-match {
+  border-color: #a94855;
+  animation: shake 0.3s;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
