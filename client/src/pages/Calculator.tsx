@@ -116,57 +116,63 @@ const Calculator = () => {
               Selección de Tanque
             </h2>
             
-            {/* Search Tank Input */}
-            <div className="mb-3">
-              <Label htmlFor="searchTank" className="block text-sm font-medium text-blue-300 mb-1">
-                Buscar Tanque
-              </Label>
-              <div className="relative">
-                <Input
-                  id="searchTank"
-                  type="text"
-                  value={selectedTankId}
-                  onChange={(e) => {
-                    const searchValue = e.target.value.toUpperCase();
-                    setSelectedTankId(searchValue);
-                    
-                    // Check if the search matches any tank ID
-                    if (Object.keys(tankData).includes(searchValue)) {
-                      setSelectedTank(tankData[searchValue]);
-                      setResult(null);
-                      setError(null);
-                    } else {
-                      setSelectedTank(null);
-                    }
-                  }}
-                  placeholder="Escribe el ID del tanque..."
-                  className={`bg-card border-accent/30 text-foreground focus:border-accent/70 ${!selectedTank && selectedTankId ? 'border-red-500' : ''}`}
-                />
-                <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-accent/80">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            {/* Tank Selection Controls - Side by side */}
+            <div className="flex flex-row gap-2 items-start">
+              {/* Search Tank Input */}
+              <div className="flex-1">
+                <Label htmlFor="searchTank" className="block text-sm font-medium text-blue-300 mb-1">
+                  ID Tanque
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="searchTank"
+                    type="text"
+                    value={selectedTankId}
+                    onChange={(e) => {
+                      const searchValue = e.target.value.toUpperCase();
+                      setSelectedTankId(searchValue);
+                      
+                      // Check if the search matches any tank ID
+                      if (Object.keys(tankData).includes(searchValue)) {
+                        setSelectedTank(tankData[searchValue]);
+                        setResult(null);
+                        setError(null);
+                      } else {
+                        setSelectedTank(null);
+                      }
+                    }}
+                    placeholder="ID"
+                    maxLength={5}
+                    className={`bg-card border-accent/30 text-foreground focus:border-accent/70 w-32 text-center font-mono text-lg ${!selectedTank && selectedTankId ? 'border-red-500' : ''}`}
+                  />
                 </div>
               </div>
+              
+              {/* Dropdown Select */}
+              <div className="flex-1">
+                <Label htmlFor="tankSelect" className="block text-sm font-medium text-blue-300 mb-1">
+                  Seleccionar
+                </Label>
+                <Select value={selectedTankId} onValueChange={handleSelectTank}>
+                  <SelectTrigger id="tankSelect" className="bg-card border-accent/30 focus:ring-accent/50 w-full">
+                    <SelectValue placeholder="Seleccionar" />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-60 bg-card border-accent/30">
+                    {Object.keys(tankData).map((tankId) => (
+                      <SelectItem key={tankId} value={tankId} className="text-foreground hover:bg-accent/20">
+                        {tankId}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            
-            {/* Dropdown Select */}
-            <Select value={selectedTankId} onValueChange={handleSelectTank}>
-              <SelectTrigger className="w-full mb-2 bg-card border-accent/30 focus:ring-accent/50">
-                <SelectValue placeholder="-- Selecciona un Tanque --" />
-              </SelectTrigger>
-              <SelectContent className="max-h-60 bg-card border-accent/30">
-                {Object.keys(tankData).map((tankId) => (
-                  <SelectItem key={tankId} value={tankId} className="text-foreground hover:bg-accent/20">
-                    {tankId}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
             
             {/* Feedback when no tank is found */}
             {selectedTankId && !selectedTank && (
               <p className="text-xs text-red-500 mt-1 flex items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-                No se encontró ningún tanque con ID "{selectedTankId}"
+                No se encontró "{selectedTankId}"
               </p>
             )}
           </div>
