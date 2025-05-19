@@ -34,18 +34,14 @@ const ResultDisplay = ({
             <p className="font-bold text-xl text-vineyard-700">{formatNumber(result.totalGallons)}</p>
           </div>
           <div>
-            <p className="text-sm text-gray-600">Espacio disponible para más vino:</p>
-            <p className="font-bold text-xl text-wine-700">{formatNumber(result.remainingGallons)} galones</p>
+            <p className="text-sm text-gray-600">Galones restantes:</p>
+            <p className="font-bold text-xl text-wine-700">{formatNumber(result.remainingGallons)}</p>
           </div>
         </div>
       )}
       
       {isGallonsToSpace(result) && (
         <div className="grid grid-cols-1 gap-4">
-          <div>
-            <p className="text-sm text-gray-600">Total de galones en el tanque:</p>
-            <p className="font-bold text-xl text-vineyard-700">{formatNumber(result.fillPercentage / 100 * (result as any).tankTotalGallons || 0)}</p>
-          </div>
           <div>
             <p className="text-sm text-gray-600">Espacio requerido (en pulgadas):</p>
             <p className="font-bold text-xl text-wine-700">{formatNumber(result.requiredSpace)}</p>
