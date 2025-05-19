@@ -90,66 +90,72 @@ const Calculator = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-wine-50">
+    <div className="min-h-screen flex flex-col bg-background">
       {/* Header */}
-      <header className="bg-gradient-to-r from-wine-600 to-wine-800 py-3 shadow-md">
+      <header className="bg-gradient-to-r from-primary to-indigo-800 py-3 shadow-md">
         <div className="container mx-auto px-3 flex flex-col sm:flex-row justify-between items-center">
           <h1 
-            className="text-2xl md:text-3xl font-serif font-bold text-white glitch-effect text-center sm:text-left mb-1 sm:mb-0" 
+            className="text-2xl md:text-3xl font-mono font-bold text-white glitch-effect text-center sm:text-left mb-1 sm:mb-0" 
             data-text="Caymus Calculator"
           >
-            Caymus Calculator
+            <span className="text-accent">C</span>aymus <span className="text-accent">C</span>alculator
           </h1>
-          <div className="text-oak-100 text-sm md:text-base font-light">
-            Wine Tank Calculator
+          <div className="text-blue-100 text-sm md:text-base font-light tracking-wider">
+            <span className="bg-secondary px-2 py-1 rounded">WINE TANK MATRIX</span>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
       <main className="container mx-auto px-3 py-4 flex-grow">
-        <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 max-w-2xl mx-auto">
+        <div className="bg-card rounded-lg shadow-2xl border border-accent/20 p-4 sm:p-6 max-w-2xl mx-auto backdrop-blur-sm">
           {/* Tank Selection */}
           <div className="mb-4">
-            <h2 className="text-xl font-serif text-wine-700 mb-3 border-b border-wine-200 pb-2">
+            <h2 className="text-xl font-mono text-accent mb-3 border-b border-accent/30 pb-2 flex items-center">
+              <span className="inline-block w-3 h-3 bg-accent mr-2 rounded-full animate-pulse"></span>
               Selección de Tanque
             </h2>
             
             {/* Search Tank Input */}
             <div className="mb-3">
-              <Label htmlFor="searchTank" className="block text-sm font-medium text-gray-700 mb-1">
+              <Label htmlFor="searchTank" className="block text-sm font-medium text-blue-300 mb-1">
                 Buscar Tanque
               </Label>
-              <Input
-                id="searchTank"
-                type="text"
-                value={selectedTankId}
-                onChange={(e) => {
-                  const searchValue = e.target.value.toUpperCase();
-                  setSelectedTankId(searchValue);
-                  
-                  // Check if the search matches any tank ID
-                  if (Object.keys(tankData).includes(searchValue)) {
-                    setSelectedTank(tankData[searchValue]);
-                    setResult(null);
-                    setError(null);
-                  } else {
-                    setSelectedTank(null);
-                  }
-                }}
-                placeholder="Escribe el ID del tanque..."
-                className={!selectedTank && selectedTankId ? 'border-red-300' : ''}
-              />
+              <div className="relative">
+                <Input
+                  id="searchTank"
+                  type="text"
+                  value={selectedTankId}
+                  onChange={(e) => {
+                    const searchValue = e.target.value.toUpperCase();
+                    setSelectedTankId(searchValue);
+                    
+                    // Check if the search matches any tank ID
+                    if (Object.keys(tankData).includes(searchValue)) {
+                      setSelectedTank(tankData[searchValue]);
+                      setResult(null);
+                      setError(null);
+                    } else {
+                      setSelectedTank(null);
+                    }
+                  }}
+                  placeholder="Escribe el ID del tanque..."
+                  className={`bg-card border-accent/30 text-foreground focus:border-accent/70 ${!selectedTank && selectedTankId ? 'border-red-500' : ''}`}
+                />
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-accent/80">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                </div>
+              </div>
             </div>
             
             {/* Dropdown Select */}
             <Select value={selectedTankId} onValueChange={handleSelectTank}>
-              <SelectTrigger className="w-full mb-2">
+              <SelectTrigger className="w-full mb-2 bg-card border-accent/30 focus:ring-accent/50">
                 <SelectValue placeholder="-- Selecciona un Tanque --" />
               </SelectTrigger>
-              <SelectContent className="max-h-60">
+              <SelectContent className="max-h-60 bg-card border-accent/30">
                 {Object.keys(tankData).map((tankId) => (
-                  <SelectItem key={tankId} value={tankId}>
+                  <SelectItem key={tankId} value={tankId} className="text-foreground hover:bg-accent/20">
                     {tankId}
                   </SelectItem>
                 ))}
@@ -158,7 +164,8 @@ const Calculator = () => {
             
             {/* Feedback when no tank is found */}
             {selectedTankId && !selectedTank && (
-              <p className="text-xs text-red-500 mt-1">
+              <p className="text-xs text-red-500 mt-1 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
                 No se encontró ningún tanque con ID "{selectedTankId}"
               </p>
             )}
@@ -167,24 +174,27 @@ const Calculator = () => {
           {/* Tank Specifications */}
           {selectedTank && (
             <div className="mb-4">
-              <div className="p-3 bg-oak-50 rounded-lg border border-oak-200">
-                <h3 className="text-lg font-semibold text-oak-800 mb-2">Especificaciones</h3>
+              <div className="p-3 bg-secondary/30 rounded-lg border border-accent/20 backdrop-blur-sm">
+                <h3 className="text-lg font-mono text-accent mb-2 flex items-center">
+                  <span className="text-xs mr-2 bg-accent/20 px-2 py-0.5 rounded">[SPEC]</span>
+                  Especificaciones
+                </h3>
                 <div className="grid grid-cols-2 gap-2 text-sm">
-                  <div className="flex justify-between">
-                    <span>Galones/Pulgada:</span>
-                    <span className="font-medium">{selectedTank.GALS_PER_INCH.toFixed(2)}</span>
+                  <div className="flex justify-between p-1 border-b border-accent/10">
+                    <span className="text-blue-300">Galones/Pulgada:</span>
+                    <span className="font-mono text-white">{selectedTank.GALS_PER_INCH.toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span>Galones en Tope:</span>
-                    <span className="font-medium">{selectedTank.GALS_IN_TOP.toFixed(2)}</span>
+                  <div className="flex justify-between p-1 border-b border-accent/10">
+                    <span className="text-blue-300">Galones en Tope:</span>
+                    <span className="font-mono text-white">{selectedTank.GALS_IN_TOP.toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span>Pulgadas en Tope:</span>
-                    <span className="font-medium">{selectedTank.TOP_INCHES.toFixed(2)}</span>
+                  <div className="flex justify-between p-1 border-b border-accent/10">
+                    <span className="text-blue-300">Pulgadas en Tope:</span>
+                    <span className="font-mono text-white">{selectedTank.TOP_INCHES.toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span>Galones Totales:</span>
-                    <span className="font-medium">{selectedTank.TOTAL_GALS.toFixed(2)}</span>
+                  <div className="flex justify-between p-1 border-b border-accent/10">
+                    <span className="text-blue-300">Galones Totales:</span>
+                    <span className="font-mono text-white">{selectedTank.TOTAL_GALS.toFixed(2)}</span>
                   </div>
                 </div>
               </div>
@@ -199,15 +209,20 @@ const Calculator = () => {
               onValueChange={handleModeChange}
               className="w-full"
             >
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="spaceToGallons">Espacio → Galones</TabsTrigger>
-                <TabsTrigger value="gallonsToSpace">Galones → Espacio</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-2 bg-secondary/40 border border-accent/20">
+                <TabsTrigger value="spaceToGallons" className="data-[state=active]:bg-accent data-[state=active]:text-black">
+                  <span className="mr-1">⇣</span> Espacio → Galones
+                </TabsTrigger>
+                <TabsTrigger value="gallonsToSpace" className="data-[state=active]:bg-accent data-[state=active]:text-black">
+                  <span className="mr-1">⇡</span> Galones → Espacio
+                </TabsTrigger>
               </TabsList>
               
               {/* Space to Gallons Content */}
-              <TabsContent value="spaceToGallons" className="mt-4">
+              <TabsContent value="spaceToGallons" className="mt-4 p-3 border border-accent/20 rounded-md bg-secondary/20">
                 <div className="mb-4">
-                  <Label htmlFor="inchesSpace" className="block text-sm font-medium text-gray-700 mb-1">
+                  <Label htmlFor="inchesSpace" className="block text-sm font-medium text-blue-300 mb-1 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1"><path d="M2 12h10"/><path d="m9 7 5 5-5 5"/><path d="M22 12H12"/></svg>
                     Pulgadas de Espacio
                   </Label>
                   <div className="flex">
@@ -219,22 +234,24 @@ const Calculator = () => {
                       placeholder="Ingrese pulgadas..."
                       step="0.01"
                       min="0"
-                      className="rounded-r-none"
+                      className="rounded-r-none bg-card border-accent/30 focus:border-accent"
                     />
-                    <span className="inline-flex items-center px-3 bg-gray-100 text-gray-600 border border-l-0 border-gray-300 rounded-r-md">
+                    <span className="inline-flex items-center px-3 bg-secondary text-accent font-mono border border-l-0 border-accent/30 rounded-r-md">
                       in
                     </span>
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-blue-200/70 mt-1 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
                     Ingrese la medida de espacio vacío desde la parte superior del tanque
                   </p>
                 </div>
               </TabsContent>
               
               {/* Gallons to Space Content */}
-              <TabsContent value="gallonsToSpace" className="mt-4">
+              <TabsContent value="gallonsToSpace" className="mt-4 p-3 border border-accent/20 rounded-md bg-secondary/20">
                 <div className="mb-4">
-                  <Label htmlFor="desiredGallons" className="block text-sm font-medium text-gray-700 mb-1">
+                  <Label htmlFor="desiredGallons" className="block text-sm font-medium text-blue-300 mb-1 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2"/><path d="M18 15h6"/><path d="M18 22h6v-7h-6v7Z"/></svg>
                     Galones Deseados
                   </Label>
                   <div className="flex">
@@ -247,13 +264,14 @@ const Calculator = () => {
                       step="0.01"
                       min="0"
                       max={selectedTank?.TOTAL_GALS || 0}
-                      className="rounded-r-none"
+                      className="rounded-r-none bg-card border-accent/30 focus:border-accent"
                     />
-                    <span className="inline-flex items-center px-3 bg-gray-100 text-gray-600 border border-l-0 border-gray-300 rounded-r-md">
+                    <span className="inline-flex items-center px-3 bg-secondary text-accent font-mono border border-l-0 border-accent/30 rounded-r-md">
                       gal
                     </span>
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-blue-200/70 mt-1 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
                     Ingrese el volumen deseado en galones
                   </p>
                 </div>
