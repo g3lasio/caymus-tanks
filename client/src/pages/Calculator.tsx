@@ -114,6 +114,35 @@ const Calculator = () => {
             <h2 className="text-xl font-serif text-wine-700 mb-3 border-b border-wine-200 pb-2">
               Selección de Tanque
             </h2>
+            
+            {/* Search Tank Input */}
+            <div className="mb-3">
+              <Label htmlFor="searchTank" className="block text-sm font-medium text-gray-700 mb-1">
+                Buscar Tanque
+              </Label>
+              <Input
+                id="searchTank"
+                type="text"
+                value={selectedTankId}
+                onChange={(e) => {
+                  const searchValue = e.target.value.toUpperCase();
+                  setSelectedTankId(searchValue);
+                  
+                  // Check if the search matches any tank ID
+                  if (Object.keys(tankData).includes(searchValue)) {
+                    setSelectedTank(tankData[searchValue]);
+                    setResult(null);
+                    setError(null);
+                  } else {
+                    setSelectedTank(null);
+                  }
+                }}
+                placeholder="Escribe el ID del tanque..."
+                className={!selectedTank && selectedTankId ? 'border-red-300' : ''}
+              />
+            </div>
+            
+            {/* Dropdown Select */}
             <Select value={selectedTankId} onValueChange={handleSelectTank}>
               <SelectTrigger className="w-full mb-2">
                 <SelectValue placeholder="-- Selecciona un Tanque --" />
@@ -126,6 +155,13 @@ const Calculator = () => {
                 ))}
               </SelectContent>
             </Select>
+            
+            {/* Feedback when no tank is found */}
+            {selectedTankId && !selectedTank && (
+              <p className="text-xs text-red-500 mt-1">
+                No se encontró ningún tanque con ID "{selectedTankId}"
+              </p>
+            )}
           </div>
           
           {/* Tank Visualization & Specifications */}
