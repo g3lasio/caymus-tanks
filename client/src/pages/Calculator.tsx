@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import tankData, { TankData } from '@/data/tankData';
 import { useTankCalculator } from '@/hooks/useTankCalculator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import TankVisual from '@/components/TankVisual';
 
 const Calculator = () => {
@@ -15,6 +16,8 @@ const Calculator = () => {
   const [inchesSpace, setInchesSpace] = useState<string>('');
   const [desiredGallons, setDesiredGallons] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
+  const [searchHistory, setSearchHistory] = useState<string[]>([]);
+  const [isHistoryOpen, setIsHistoryOpen] = useState<boolean>(false);
   
   const { 
     mode, 
@@ -31,11 +34,46 @@ const Calculator = () => {
     return num.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
+  // Cargar historial de búsqueda del localStorage al inicio
+  useEffect(() => {
+    const savedHistory = localStorage.getItem('tankSearchHistory');
+    if (savedHistory) {
+      try {
+        const parsedHistory = JSON.parse(savedHistory);
+        if (Array.isArray(parsedHistory)) {
+          setSearchHistory(parsedHistory);
+        }
+      } catch (e) {
+        console.error('Error parsing search history', e);
+      }
+    }
+  }, []);
+
+  const addToHistory = (tankId: string) => {
+    if (!tankId) return;
+    
+    setSearchHistory(prevHistory => {
+      // Si el ID ya está en el historial, lo movemos al principio
+      const newHistory = prevHistory.filter(id => id !== tankId);
+      // Añadimos el nuevo ID al principio y limitamos a 10 elementos
+      const updatedHistory = [tankId, ...newHistory].slice(0, 10);
+      
+      // Guardamos en localStorage
+      localStorage.setItem('tankSearchHistory', JSON.stringify(updatedHistory));
+      
+      return updatedHistory;
+    });
+  };
+
   const handleSelectTank = (tankId: string) => {
     setSelectedTankId(tankId);
     setSelectedTank(tankData[tankId] || null);
     setResult(null); // Clear result when changing tank
     setError(null);
+    // Añadir al historial si se encontró un tanque válido
+    if (tankData[tankId]) {
+      addToHistory(tankId);
+    }
   };
 
   const handleCalculate = () => {
@@ -165,6 +203,50 @@ const Calculator = () => {
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+              
+              {/* History Button */}
+              <div className="flex flex-col items-start mt-6">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-10 w-10 rounded-full bg-secondary border-accent/30 hover:bg-accent/20"
+                      aria-label="Mostrar historial"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" 
+                           stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" 
+                           className="text-accent">
+                        <path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z"></path>
+                        <path d="M12 7v5l3 3"></path>
+                      </svg>
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-48 p-0 bg-card border-accent/30">
+                    <div className="p-2 bg-secondary/50 border-b border-accent/20">
+                      <p className="text-xs font-mono text-blue-300">BÚSQUEDAS RECIENTES</p>
+                    </div>
+                    {searchHistory.length > 0 ? (
+                      <div className="max-h-40 overflow-y-auto">
+                        {searchHistory.map((tankId) => (
+                          <button
+                            key={tankId}
+                            className="w-full text-left py-1.5 px-3 hover:bg-accent/20 font-mono text-sm text-foreground flex items-center"
+                            onClick={() => handleSelectTank(tankId)}
+                          >
+                            <span className="inline-block w-2 h-2 bg-accent rounded-full mr-2"></span>
+                            {tankId}
+                          </button>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="p-3 text-xs text-foreground/70">
+                        No hay búsquedas recientes
+                      </div>
+                    )}
+                  </PopoverContent>
+                </Popover>
               </div>
             </div>
             
