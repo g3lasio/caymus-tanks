@@ -95,6 +95,11 @@ const Calculator = () => {
         if (isSpaceToGallons(calculationResult)) {
           setFillPercentage(calculationResult.fillPercentage);
         }
+        
+        // Auto-guardar después de calcular
+        if (selectedTankId) {
+          addToHistory(selectedTankId);
+        }
       } else {
         const gallonsValue = parseFloat(desiredGallons);
         if (isNaN(gallonsValue) || gallonsValue < 0 || gallonsValue > selectedTank.TOTAL_GALS) {
@@ -106,6 +111,11 @@ const Calculator = () => {
         
         if (isGallonsToSpace(calculationResult)) {
           setFillPercentage(calculationResult.fillPercentage);
+        }
+        
+        // Auto-guardar después de calcular
+        if (selectedTankId) {
+          addToHistory(selectedTankId);
         }
       }
     } catch (err) {
@@ -175,6 +185,8 @@ const Calculator = () => {
                         setSelectedTank(tankData[searchValue]);
                         setResult(null);
                         setError(null);
+                        // Añadir inmediatamente al historial cuando se encuentra un tanque válido
+                        addToHistory(searchValue);
                       } else {
                         setSelectedTank(null);
                       }
