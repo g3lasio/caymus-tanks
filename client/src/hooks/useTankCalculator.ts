@@ -86,33 +86,36 @@ export const useTankCalculator = () => {
       throw new Error(`Los galones deseados deben estar entre 0 y ${tankData.TOTAL_GALS.toFixed(2)}`);
     }
 
-    // Calculamos el espacio vacío en galones
+    // Calculamos el espacio vacío en galones (lo que NO está ocupado por vino)
     const emptyGallons = tankData.TOTAL_GALS - desiredGallons;
+    
+    // Calculamos cuántos galones de espacio vacío hay en el cuerpo principal (sin contar el top)
+    const emptyMainBodyGallons = emptyGallons - tankData.GALS_IN_TOP;
+    
     let requiredSpace = 0; // Espacio vacío en pulgadas (lo que medirá el empleado)
     let mainBodyInches = 0;
     let topSectionInches = 0;
 
-    if (desiredGallons <= tankData.GALS_IN_TOP) {
-      // El vino solo llega a la sección superior
-      // Calculamos qué porción de la sección superior está ocupada
-      const filledTopPortion = desiredGallons / tankData.GALS_IN_TOP;
-      // El espacio vacío en la sección superior
-      topSectionInches = tankData.TOP_INCHES * (1 - filledTopPortion);
-      // Todo el espacio del cuerpo principal está vacío
-      mainBodyInches = (tankData.TOTAL_GALS - tankData.GALS_IN_TOP) / tankData.GALS_PER_INCH;
-      requiredSpace = topSectionInches + mainBodyInches;
-    } else {
-      // El vino ocupa toda la sección superior y parte del cuerpo principal
-      // La sección superior está completamente llena, no hay espacio vacío allí
-      topSectionInches = 0;
+    if (emptyMainBodyGallons <= 0) {
+      // Si emptyMainBodyGallons es negativo o cero, significa que parte o toda la sección top está ocupada
+      // El cuerpo principal está completamente lleno
+      mainBodyInches = 0;
       
-      // Calculamos los galones que ocupan el cuerpo principal
-      const mainBodyGallons = desiredGallons - tankData.GALS_IN_TOP;
-      // Calculamos las pulgadas llenas en el cuerpo principal
-      const filledMainBodyInches = mainBodyGallons / tankData.GALS_PER_INCH;
-      // El espacio vacío en el cuerpo principal
-      mainBodyInches = (tankData.TOTAL_GALS - tankData.GALS_IN_TOP) / tankData.GALS_PER_INCH - filledMainBodyInches;
-      requiredSpace = mainBodyInches;
+      // El espacio en la sección top es proporcional a la cantidad de galones vacíos
+      topSectionInches = tankData.TOP_INCHES * (emptyGallons / tankData.GALS_IN_TOP);
+      
+      // El espacio total a medir es solo lo que hay en la sección top
+      requiredSpace = topSectionInches;
+    } else {
+      // El cuerpo principal tiene espacio vacío
+      // Toda la sección top está vacía
+      topSectionInches = tankData.TOP_INCHES;
+      
+      // Convertimos los galones vacíos del cuerpo principal a pulgadas
+      mainBodyInches = emptyMainBodyGallons / tankData.GALS_PER_INCH;
+      
+      // El espacio total a medir es la suma del espacio en top + espacio en cuerpo principal
+      requiredSpace = topSectionInches + mainBodyInches;
     }
 
     const fillPercentage = (desiredGallons / tankData.TOTAL_GALS) * 100;
