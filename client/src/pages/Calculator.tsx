@@ -9,6 +9,17 @@ import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import TankVisual from '@/components/TankVisual';
 
+// Interfaz para los elementos del historial
+interface HistoryItem {
+  tankId: string;
+  mode: 'spaceToGallons' | 'gallonsToSpace';
+  value?: number;
+  totalGallons?: number;
+  remainingGallons?: number;
+  requiredSpace?: number;
+  timestamp: number;
+}
+
 const Calculator = () => {
   const [selectedTankId, setSelectedTankId] = useState<string>('');
   const [selectedTank, setSelectedTank] = useState<TankData | null>(null);
@@ -16,7 +27,7 @@ const Calculator = () => {
   const [inchesSpace, setInchesSpace] = useState<string>('');
   const [desiredGallons, setDesiredGallons] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
-  const [searchHistory, setSearchHistory] = useState<string[]>([]);
+  const [searchHistory, setSearchHistory] = useState<HistoryItem[]>([]);
   const [isHistoryOpen, setIsHistoryOpen] = useState<boolean>(false);
   
   const { 
@@ -49,14 +60,21 @@ const Calculator = () => {
     }
   }, []);
 
-  const addToHistory = (tankId: string) => {
+  const addToHistory = (tankId: string, calculationData?: HistoryItem['calculation']) => {
     if (!tankId) return;
     
+    const newHistoryItem: HistoryItem = {
+      tankId,
+      timestamp: Date.now(),
+      calculation: calculationData
+    };
+    
     setSearchHistory(prevHistory => {
-      // Si el ID ya está en el historial, lo movemos al principio
-      const newHistory = prevHistory.filter(id => id !== tankId);
-      // Añadimos el nuevo ID al principio y limitamos a 10 elementos
-      const updatedHistory = [tankId, ...newHistory].slice(0, 10);
+      // Eliminamos entradas previas del mismo tanque
+      const filteredHistory = prevHistory.filter(item => item.tankId !== tankId);
+      
+      // Añadimos el nuevo item al principio y limitamos a 10 elementos
+      const updatedHistory = [newHistoryItem, ...filteredHistory].slice(0, 10);
       
       // Guardamos en localStorage
       localStorage.setItem('tankSearchHistory', JSON.stringify(updatedHistory));
@@ -241,14 +259,33 @@ const Calculator = () => {
                     </div>
                     {searchHistory.length > 0 ? (
                       <div className="max-h-40 overflow-y-auto">
-                        {searchHistory.map((tankId) => (
+                        {searchHistory.map((item) => (
                           <button
-                            key={tankId}
-                            className="w-full text-left py-1.5 px-3 hover:bg-accent/20 font-mono text-sm text-foreground flex items-center"
-                            onClick={() => handleSelectTank(tankId)}
+                            key={item.tankId + "-" + item.timestamp}
+                            className="w-full text-left py-1.5 px-3 hover:bg-accent/20 font-mono text-sm text-foreground flex flex-col"
+                            onClick={() => handleSelectTank(item.tankId)}
                           >
-                            <span className="inline-block w-2 h-2 bg-accent rounded-full mr-2"></span>
-                            {tankId}
+                            <div className="flex items-center">
+                              <span className="inline-block w-2 h-2 bg-accent rounded-full mr-2"></span>
+                              <span className="font-bold">{item.tankId}</span>
+                            </div>
+                            {item.calculation && (
+                              <div className="ml-4 mt-1 text-xs text-blue-300/80">
+                                {item.calculation.mode === 'spaceToGallons' && item.calculation.result?.totalGallons !== undefined && (
+                                  <div className="flex flex-col">
+                                    <span>Galones: {formatNumber(item.calculation.result.totalGallons)}</span>
+                                    {item.calculation.result.remainingGallons !== undefined && (
+                                      <span>Restante: {formatNumber(item.calculation.result.remainingGallons)}</span>
+                                    )}
+                                  </div>
+                                )}
+                                {item.calculation.mode === 'gallonsToSpace' && item.calculation.result?.requiredSpace !== undefined && (
+                                  <div>
+                                    <span>Espacio: {formatNumber(item.calculation.result.requiredSpace)} pulg.</span>
+                                  </div>
+                                )}
+                              </div>
+                            )}
                           </button>
                         ))}
                       </div>
