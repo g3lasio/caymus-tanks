@@ -61,11 +61,15 @@ export const useTankCalculator = () => {
       topSectionGallons = tankData.GALS_IN_TOP;
     }
     
-    // 4. Restar del TOTAL_GALS para obtener los galones restantes
-    const remainingGallons = tankData.TOTAL_GALS - convertedGallons;
+    // Calculamos el total de galones vacíos (convertedGallons)
     
-    // Calculamos el total de galones que hay realmente en el tanque
+    // El vino en el tanque es el total menos los galones vacíos
     const totalGallons = tankData.TOTAL_GALS - convertedGallons;
+    
+    // Los galones restantes son los que aún se pueden añadir (galones vacíos)
+    const remainingGallons = convertedGallons;
+    
+    // El porcentaje de llenado es el total de vino entre la capacidad total
     const fillPercentage = (totalGallons / tankData.TOTAL_GALS) * 100;
 
     return {
