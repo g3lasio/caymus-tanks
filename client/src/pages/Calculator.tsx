@@ -513,7 +513,11 @@ const Calculator = () => {
       {/* Footer */}
       <footer className="bg-gradient-to-r from-indigo-900 to-primary text-white py-3 mt-auto border-t border-accent/30">
         <div className="container mx-auto px-3 text-center">
-          <p className="font-mono text-xs tracking-wider opacity-80">&copy; {new Date().getFullYear()} <span className="text-accent">CAYMUS</span> CALCULATOR v2.0</p>
+          <p className="font-mono text-xs tracking-wider opacity-80">
+            &copy; {new Date().getFullYear()} <span className="text-accent">CAYMUS</span> CALCULATOR v2.0
+            <span className="mx-2">•</span>
+            <span>Created by Gelasio S.</span>
+          </p>
         </div>
       </footer>
     </div>
