@@ -37,33 +37,35 @@ export const useTankCalculator = () => {
       throw new Error('La medida de espacio no puede ser mayor que la altura total del tanque');
     }
 
+    // NUEVA IMPLEMENTACIÓN SEGÚN LA FÓRMULA CORRECTA
+    let convertedGallons = 0;
     let mainBodyGallons = 0;
     let topSectionGallons = 0;
     
-    // El espacio vacío es lo que se mide desde la parte superior
-    if (emptySpaceInches < tankData.TOP_INCHES) {
-      // El espacio vacío está solo en la sección superior
-      // Por lo tanto, se ha llenado parte de la sección superior
-      topSectionGallons = tankData.GALS_IN_TOP - (emptySpaceInches * (tankData.GALS_IN_TOP / tankData.TOP_INCHES));
-      // El cuerpo principal está completamente vacío
+    // 1. Restar TOP_INCHES del espacio vacío ingresado
+    const adjustedInches = emptySpaceInches - tankData.TOP_INCHES;
+    
+    if (adjustedInches < 0) {
+      // Si el resultado es negativo, significa que solo hay espacio en la sección superior
+      convertedGallons = tankData.GALS_IN_TOP;
+      topSectionGallons = tankData.GALS_IN_TOP;
       mainBodyGallons = 0;
     } else {
-      // El espacio vacío incluye toda la sección superior y parte del cuerpo principal
-      // La sección superior está completamente llena
+      // 2. Multiplicar el resultado por GALS_PER_INCH
+      const mainBodyEmptyGallons = adjustedInches * tankData.GALS_PER_INCH;
+      
+      // 3. Sumar GALS_IN_TOP
+      convertedGallons = mainBodyEmptyGallons + tankData.GALS_IN_TOP;
+      
+      mainBodyGallons = mainBodyEmptyGallons;
       topSectionGallons = tankData.GALS_IN_TOP;
-      
-      // Calculamos cuántos galones hay en el cuerpo principal
-      // Primero, determinamos cuántas pulgadas del cuerpo principal están llenas
-      const filledMainBodyInches = (tankData.TOTAL_GALS - tankData.GALS_IN_TOP) / tankData.GALS_PER_INCH - (emptySpaceInches - tankData.TOP_INCHES);
-      
-      // Si hay pulgadas llenas en el cuerpo principal, calculamos los galones
-      if (filledMainBodyInches > 0) {
-        mainBodyGallons = filledMainBodyInches * tankData.GALS_PER_INCH;
-      }
     }
-
-    const totalGallons = mainBodyGallons + topSectionGallons;
-    const remainingGallons = tankData.TOTAL_GALS - totalGallons;
+    
+    // 4. Restar del TOTAL_GALS para obtener los galones restantes
+    const remainingGallons = tankData.TOTAL_GALS - convertedGallons;
+    
+    // Calculamos el total de galones que hay realmente en el tanque
+    const totalGallons = tankData.TOTAL_GALS - convertedGallons;
     const fillPercentage = (totalGallons / tankData.TOTAL_GALS) * 100;
 
     return {
