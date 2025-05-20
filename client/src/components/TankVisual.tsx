@@ -41,6 +41,9 @@ const TankVisual = ({
         className="w-full h-64 border-2 border-accent/50 rounded-lg tank-fill mx-auto mb-2 overflow-hidden relative bg-black/20 backdrop-blur-sm" 
         style={{ '--fill-height': `${boundedFillPercentage}%` } as React.CSSProperties}
       >
+        {/* Efecto de ondulación en la superficie del vino */}
+        <div className="wine-ripple"></div>
+        
         {/* Grid background */}
         <div className="absolute inset-0 opacity-10" 
              style={{
