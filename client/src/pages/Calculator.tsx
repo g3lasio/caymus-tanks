@@ -64,9 +64,13 @@ const Calculator = () => {
     // Determinar la información adicional a guardar
     if (result) {
       if (mode === 'spaceToGallons' && isSpaceToGallons(result)) {
-        info = `${formatNumber(result.totalGallons)} gal / ${formatNumber(result.remainingGallons)} restantes`;
+        // Para medida en pulgadas a galones, mostramos las pulgadas ingresadas y galones del vino
+        const inches = parseFloat(inchesSpace);
+        info = `${inches} pulg. → ${formatNumber(result.totalGallons)} gal.`;
       } else if (mode === 'gallonsToSpace' && isGallonsToSpace(result)) {
-        info = `Espacio: ${formatNumber(result.requiredSpace)} pulg.`;
+        // Para galones a espacio, mostramos los galones deseados y el espacio requerido
+        const gallons = parseFloat(desiredGallons);
+        info = `${formatNumber(gallons)} gal. → ${formatNumber(result.requiredSpace)} pulg.`;
       }
     }
     
