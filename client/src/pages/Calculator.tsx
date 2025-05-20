@@ -12,11 +12,7 @@ import TankVisual from '@/components/TankVisual';
 // Interfaz para los elementos del historial
 interface HistoryItem {
   tankId: string;
-  mode: 'spaceToGallons' | 'gallonsToSpace';
-  value?: number;
-  totalGallons?: number;
-  remainingGallons?: number;
-  requiredSpace?: number;
+  info: string; // Información adicional del cálculo (medida, galones, etc.)
   timestamp: number;
 }
 
@@ -60,13 +56,24 @@ const Calculator = () => {
     }
   }, []);
 
-  const addToHistory = (tankId: string, calculationData?: HistoryItem['calculation']) => {
-    if (!tankId) return;
+  const addToHistory = (tankId: string) => {
+    if (!tankId || !tankData[tankId]) return;
+    
+    let info = '';
+    
+    // Determinar la información adicional a guardar
+    if (result) {
+      if (mode === 'spaceToGallons' && isSpaceToGallons(result)) {
+        info = `${formatNumber(result.totalGallons)} gal / ${formatNumber(result.remainingGallons)} restantes`;
+      } else if (mode === 'gallonsToSpace' && isGallonsToSpace(result)) {
+        info = `Espacio: ${formatNumber(result.requiredSpace)} pulg.`;
+      }
+    }
     
     const newHistoryItem: HistoryItem = {
       tankId,
-      timestamp: Date.now(),
-      calculation: calculationData
+      info,
+      timestamp: Date.now()
     };
     
     setSearchHistory(prevHistory => {
@@ -269,21 +276,9 @@ const Calculator = () => {
                               <span className="inline-block w-2 h-2 bg-accent rounded-full mr-2"></span>
                               <span className="font-bold">{item.tankId}</span>
                             </div>
-                            {item.calculation && (
+                            {item.info && (
                               <div className="ml-4 mt-1 text-xs text-blue-300/80">
-                                {item.calculation.mode === 'spaceToGallons' && item.calculation.result?.totalGallons !== undefined && (
-                                  <div className="flex flex-col">
-                                    <span>Galones: {formatNumber(item.calculation.result.totalGallons)}</span>
-                                    {item.calculation.result.remainingGallons !== undefined && (
-                                      <span>Restante: {formatNumber(item.calculation.result.remainingGallons)}</span>
-                                    )}
-                                  </div>
-                                )}
-                                {item.calculation.mode === 'gallonsToSpace' && item.calculation.result?.requiredSpace !== undefined && (
-                                  <div>
-                                    <span>Espacio: {formatNumber(item.calculation.result.requiredSpace)} pulg.</span>
-                                  </div>
-                                )}
+                                {item.info}
                               </div>
                             )}
                           </button>
