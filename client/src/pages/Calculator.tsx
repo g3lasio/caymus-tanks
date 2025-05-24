@@ -178,8 +178,7 @@ const Calculator = () => {
             <span className="text-accent">C</span>aymus <span className="text-accent">C</span>alculator
           </h1>
           <div className="text-blue-100 text-sm md:text-base font-light tracking-wider">
-            <span className="bg-secondary px-2 py-1 rounded">WINE TANK MATRIX</span>
-          </div>
+          </div>      </div>
         </div>
       </header>
 
