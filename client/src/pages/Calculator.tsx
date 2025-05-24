@@ -515,7 +515,7 @@ const Calculator = () => {
           <p className="font-mono text-xs tracking-wider opacity-80">
             &copy; {new Date().getFullYear()} <span className="text-accent">CAYMUS</span> CALCULATOR v2.0
             <span className="mx-2">•</span>
-            <span>Created by Gelasio S.</span>
+            <span>by Gelasio S.</span>
           </p>
         </div>
       </footer>
