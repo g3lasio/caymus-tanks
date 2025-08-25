@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import TankVisual from '@/components/TankVisual';
-import caymusLogo from '@assets/generated_images/Caymus_Calculator_minimalist_logo_7c1748c5.png';
+import caymusLogo from '@assets/IMG_6433_1756098108271.jpeg';
 
 // Interfaz para los elementos del historial
 interface HistoryItem {
