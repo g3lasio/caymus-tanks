@@ -170,12 +170,12 @@ const Calculator = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       {/* Header */}
-      <header className="bg-gradient-to-r from-primary to-indigo-800 py-6 shadow-md">
+      <header className="bg-gradient-to-r from-primary to-indigo-800 py-4 shadow-md">
         <div className="container mx-auto px-4 flex flex-col justify-center items-center">
           <img 
             src={caymusLogo} 
             alt="Caymus Calculator" 
-            className="h-12 sm:h-16 md:h-20 w-auto object-contain filter drop-shadow-lg"
+            className="h-20 sm:h-24 md:h-32 lg:h-40 w-auto max-w-full object-contain filter drop-shadow-lg"
           />
         </div>
       </header>
