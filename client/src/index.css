@@ -336,4 +336,33 @@
   .text-glow {
     text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
   }
+  
+  /* Mobile-specific improvements */
+  @media (max-width: 640px) {
+    .container {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+    
+    /* Ensure proper spacing on mobile */
+    .space-y-4 > * + * {
+      margin-top: 1rem;
+    }
+    
+    /* Better tap targets for mobile */
+    button, .button, input, select {
+      min-height: 44px;
+    }
+    
+    /* Improve readability on mobile */
+    .text-2xl {
+      font-size: 1.75rem;
+      line-height: 2rem;
+    }
+    
+    /* Better popover positioning on mobile */
+    [data-radix-popper-content-wrapper] {
+      max-width: calc(100vw - 2rem);
+    }
+  }
 }

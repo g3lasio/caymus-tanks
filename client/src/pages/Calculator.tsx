@@ -169,22 +169,20 @@ const Calculator = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       {/* Header */}
-      <header className="bg-gradient-to-r from-primary to-indigo-800 py-3 shadow-md">
-        <div className="container mx-auto px-3 flex flex-col sm:flex-row justify-between items-center">
+      <header className="bg-gradient-to-r from-primary to-indigo-800 py-4 shadow-md">
+        <div className="container mx-auto px-4 flex flex-col justify-center items-center">
           <h1 
-            className="text-2xl md:text-3xl font-mono font-bold text-white glitch-effect text-center sm:text-left mb-1 sm:mb-0" 
+            className="text-xl sm:text-2xl md:text-3xl font-mono font-bold text-white glitch-effect text-center" 
             data-text="Caymus Calculator"
           >
             <span className="text-accent">C</span>aymus <span className="text-accent">C</span>alculator
           </h1>
-          <div className="text-blue-100 text-sm md:text-base font-light tracking-wider">
-          </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-3 py-4 flex-grow">
-        <div className="bg-card rounded-lg shadow-2xl border border-accent/20 p-4 sm:p-6 max-w-2xl mx-auto backdrop-blur-sm">
+      <main className="container mx-auto px-4 py-4 flex-grow">
+        <div className="bg-card rounded-lg shadow-2xl border border-accent/20 p-4 sm:p-6 max-w-4xl mx-auto backdrop-blur-sm">
           {/* Tank Selection */}
           <div className="mb-4">
             <h2 className="text-xl font-mono text-accent mb-3 border-b border-accent/30 pb-2 flex items-center">
@@ -192,11 +190,11 @@ const Calculator = () => {
               Selección de Tanque
             </h2>
             
-            {/* Tank Selection Controls - Side by side */}
-            <div className="flex flex-row gap-2 items-start">
+            {/* Tank Selection Controls - Responsive Layout */}
+            <div className="flex flex-col sm:flex-row gap-3 items-stretch">
               {/* Search Tank Input */}
-              <div className="flex-1">
-                <Label htmlFor="searchTank" className="block text-sm font-medium text-blue-300 mb-1">
+              <div className="flex-1 min-w-0">
+                <Label htmlFor="searchTank" className="block text-sm font-medium text-blue-300 mb-2">
                   ID Tanque
                 </Label>
                 <div className="relative">
@@ -219,21 +217,21 @@ const Calculator = () => {
                         setSelectedTank(null);
                       }
                     }}
-                    placeholder="ID"
+                    placeholder="Ingrese ID"
                     maxLength={5}
-                    className={`bg-card border-accent/30 text-foreground focus:border-accent/70 w-32 text-center font-mono text-lg ${!selectedTank && selectedTankId ? 'border-red-500' : ''}`}
+                    className={`bg-card border-accent/30 text-foreground focus:border-accent/70 text-center font-mono text-lg h-12 ${!selectedTank && selectedTankId ? 'border-red-500' : ''}`}
                   />
                 </div>
               </div>
               
               {/* Dropdown Select */}
-              <div className="flex-1">
-                <Label htmlFor="tankSelect" className="block text-sm font-medium text-blue-300 mb-1">
+              <div className="flex-1 min-w-0">
+                <Label htmlFor="tankSelect" className="block text-sm font-medium text-blue-300 mb-2">
                   Seleccionar
                 </Label>
                 <Select value={selectedTankId} onValueChange={handleSelectTank}>
-                  <SelectTrigger id="tankSelect" className="bg-card border-accent/30 focus:ring-accent/50 w-full">
-                    <SelectValue placeholder="Seleccionar" />
+                  <SelectTrigger id="tankSelect" className="bg-card border-accent/30 focus:ring-accent/50 w-full h-12">
+                    <SelectValue placeholder="Seleccionar tanque" />
                   </SelectTrigger>
                   <SelectContent className="max-h-60 bg-card border-accent/30">
                     {Object.keys(tankData).map((tankId) => (
@@ -246,13 +244,13 @@ const Calculator = () => {
               </div>
               
               {/* History Button */}
-              <div className="flex flex-col items-start mt-6">
+              <div className="flex items-end sm:items-start">
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button 
                       variant="outline" 
                       size="icon" 
-                      className="h-10 w-10 rounded-full bg-secondary border-accent/30 hover:bg-accent/20"
+                      className="h-12 w-12 sm:h-10 sm:w-10 rounded-full bg-secondary border-accent/30 hover:bg-accent/20 sm:mt-8"
                       aria-label="Mostrar historial"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" 
@@ -263,7 +261,7 @@ const Calculator = () => {
                       </svg>
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-48 p-0 bg-card border-accent/30">
+                  <PopoverContent className="w-56 sm:w-48 p-0 bg-card border-accent/30">
                     <div className="p-2 bg-secondary/50 border-b border-accent/20">
                       <p className="text-xs font-mono text-blue-300">BÚSQUEDAS RECIENTES</p>
                     </div>
@@ -308,28 +306,28 @@ const Calculator = () => {
           
           {/* Tank Specifications */}
           {selectedTank && (
-            <div className="mb-4">
-              <div className="p-3 bg-secondary/30 rounded-lg border border-accent/20 backdrop-blur-sm">
-                <h3 className="text-lg font-mono text-accent mb-2 flex items-center">
+            <div className="mb-6">
+              <div className="p-4 bg-secondary/30 rounded-lg border border-accent/20 backdrop-blur-sm">
+                <h3 className="text-lg font-mono text-accent mb-4 flex items-center">
                   <span className="text-xs mr-2 bg-accent/20 px-2 py-0.5 rounded">[SPEC]</span>
                   Especificaciones
                 </h3>
-                <div className="grid grid-cols-2 gap-2 text-sm">
-                  <div className="flex justify-between p-1 border-b border-accent/10">
-                    <span className="text-blue-300">Galones/Pulgada:</span>
-                    <span className="font-mono text-white">{selectedTank.GALS_PER_INCH.toFixed(2)}</span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                  <div className="flex flex-col sm:flex-row sm:justify-between p-3 bg-black/20 rounded border border-accent/10">
+                    <span className="text-blue-300 font-medium mb-1 sm:mb-0">Galones/Pulgada:</span>
+                    <span className="font-mono text-white text-lg sm:text-base">{selectedTank.GALS_PER_INCH.toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between p-1 border-b border-accent/10">
-                    <span className="text-blue-300">Galones en Tope:</span>
-                    <span className="font-mono text-white">{selectedTank.GALS_IN_TOP.toFixed(2)}</span>
+                  <div className="flex flex-col sm:flex-row sm:justify-between p-3 bg-black/20 rounded border border-accent/10">
+                    <span className="text-blue-300 font-medium mb-1 sm:mb-0">Galones en Tope:</span>
+                    <span className="font-mono text-white text-lg sm:text-base">{selectedTank.GALS_IN_TOP.toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between p-1 border-b border-accent/10">
-                    <span className="text-blue-300">Pulgadas en Tope:</span>
-                    <span className="font-mono text-white">{selectedTank.TOP_INCHES.toFixed(2)}</span>
+                  <div className="flex flex-col sm:flex-row sm:justify-between p-3 bg-black/20 rounded border border-accent/10">
+                    <span className="text-blue-300 font-medium mb-1 sm:mb-0">Pulgadas en Tope:</span>
+                    <span className="font-mono text-white text-lg sm:text-base">{selectedTank.TOP_INCHES.toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between p-1 border-b border-accent/10">
-                    <span className="text-blue-300">Galones Totales:</span>
-                    <span className="font-mono text-white">{selectedTank.TOTAL_GALS.toFixed(2)}</span>
+                  <div className="flex flex-col sm:flex-row sm:justify-between p-3 bg-black/20 rounded border border-accent/10">
+                    <span className="text-blue-300 font-medium mb-1 sm:mb-0">Galones Totales:</span>
+                    <span className="font-mono text-white text-lg sm:text-base">{selectedTank.TOTAL_GALS.toFixed(2)}</span>
                   </div>
                 </div>
               </div>
@@ -423,10 +421,10 @@ const Calculator = () => {
           )}
           
           {/* Action Buttons */}
-          <div className="flex flex-wrap gap-3 mb-4">
+          <div className="flex flex-col sm:flex-row gap-3 mb-6">
             <Button 
               onClick={handleCalculate}
-              className="bg-accent hover:bg-accent/80 text-black font-mono uppercase tracking-wider text-sm flex items-center"
+              className="bg-accent hover:bg-accent/80 text-black font-mono uppercase tracking-wider text-sm flex items-center justify-center h-12 flex-1"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2"><path d="M3 3v18h18"/><path d="m21 3-9 9"/><path d="m21 9-9 9-3-3 9-9"/><path d="m9 15-3 3"/></svg>
               Calcular
@@ -434,7 +432,7 @@ const Calculator = () => {
             <Button 
               onClick={handleReset}
               variant="outline"
-              className="border-accent/40 text-accent hover:bg-accent/10 font-mono uppercase tracking-wider text-sm flex items-center"
+              className="border-accent/40 text-accent hover:bg-accent/10 font-mono uppercase tracking-wider text-sm flex items-center justify-center h-12 flex-1 sm:flex-initial sm:px-6"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
               Resetear
@@ -451,21 +449,21 @@ const Calculator = () => {
                 Resultado
               </h3>
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Results Data */}
-                <div className="bg-card/50 rounded-lg border border-accent/20 p-3">
+                <div className="bg-card/50 rounded-lg border border-accent/20 p-4 order-2 lg:order-1">
                   {isSpaceToGallons(result) && (
-                    <div className="grid grid-cols-1 gap-3">
-                      <div className="p-2 border-b border-accent/10">
-                        <p className="text-sm text-blue-300">Total de galones en el tanque:</p>
-                        <p className="font-mono text-xl text-white flex items-center">
+                    <div className="space-y-4">
+                      <div className="p-3 bg-black/30 rounded border border-accent/10">
+                        <p className="text-sm text-blue-300 mb-2">Total de galones en el tanque:</p>
+                        <p className="font-mono text-2xl lg:text-xl text-white flex items-center">
                           <span className="inline-block w-2 h-2 bg-accent rounded-full mr-2 animate-pulse"></span>
                           {formatNumber(result.totalGallons)}
                         </p>
                       </div>
-                      <div className="p-2">
-                        <p className="text-sm text-blue-300">Galones restantes:</p>
-                        <p className="font-mono text-xl text-white flex items-center">
+                      <div className="p-3 bg-black/30 rounded border border-accent/10">
+                        <p className="text-sm text-blue-300 mb-2">Galones restantes:</p>
+                        <p className="font-mono text-2xl lg:text-xl text-white flex items-center">
                           <span className="inline-block w-2 h-2 bg-accent rounded-full mr-2 animate-pulse"></span>
                           {formatNumber(result.remainingGallons)}
                         </p>
@@ -474,10 +472,10 @@ const Calculator = () => {
                   )}
                   
                   {isGallonsToSpace(result) && (
-                    <div className="grid grid-cols-1 gap-3">
-                      <div className="p-2">
-                        <p className="text-sm text-blue-300">Espacio requerido (en pulgadas):</p>
-                        <p className="font-mono text-xl text-white flex items-center">
+                    <div className="space-y-4">
+                      <div className="p-3 bg-black/30 rounded border border-accent/10">
+                        <p className="text-sm text-blue-300 mb-2">Espacio requerido (en pulgadas):</p>
+                        <p className="font-mono text-2xl lg:text-xl text-white flex items-center">
                           <span className="inline-block w-2 h-2 bg-accent rounded-full mr-2 animate-pulse"></span>
                           {formatNumber(result.requiredSpace)}
                         </p>
@@ -487,7 +485,7 @@ const Calculator = () => {
                 </div>
                 
                 {/* Tank Visualization */}
-                <div className="flex items-center justify-center bg-gradient-to-b from-secondary/30 to-black/30 rounded-lg border border-accent/20 p-2">
+                <div className="flex items-center justify-center bg-gradient-to-b from-secondary/30 to-black/30 rounded-lg border border-accent/20 p-4 order-1 lg:order-2">
                   {isSpaceToGallons(result) && (
                     <TankVisual 
                       fillPercentage={result.fillPercentage}
@@ -510,11 +508,11 @@ const Calculator = () => {
       </main>
 
       {/* Footer */}
-      <footer className="bg-gradient-to-r from-indigo-900 to-primary text-white py-3 mt-auto border-t border-accent/30">
-        <div className="container mx-auto px-3 text-center">
-          <p className="font-mono text-xs tracking-wider opacity-80">
-            &copy; {new Date().getFullYear()} <span className="text-accent">CAYMUS</span> CALCULATOR v2.0
-            <span className="mx-2">•</span>
+      <footer className="bg-gradient-to-r from-indigo-900 to-primary text-white py-4 mt-auto border-t border-accent/30">
+        <div className="container mx-auto px-4 text-center">
+          <p className="font-mono text-xs sm:text-sm tracking-wider opacity-80 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-0">
+            <span>&copy; {new Date().getFullYear()} <span className="text-accent">CAYMUS</span> CALCULATOR v2.0</span>
+            <span className="hidden sm:inline mx-2">•</span>
             <span>by Gelasio S.</span>
           </p>
         </div>
