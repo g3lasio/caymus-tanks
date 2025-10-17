@@ -4,12 +4,14 @@
 
 La Caymus Wine Tank Calculator es una aplicación móvil nativa para iOS diseñada para la industria del vino. Permite calcular medidas de volumen de tanques, convirtiendo entre medidas de espacio (en pulgadas) y volumen (en galones) para varios tanques de almacenamiento de vino Caymus.
 
-**IMPORTANTE: Este proyecto ahora es una aplicación React Native con Expo, NO una web app. El código se encuentra en el directorio `mobile/`.**
+**IMPORTANTE: Este proyecto ahora es una aplicación React Native con Expo, NO una web app.**
+
+El proyecto Expo completo está en el directorio `mobile/` con sus propias dependencias y configuración, independiente de la raíz del proyecto.
 
 La aplicación incluye:
 - ✅ Especificaciones completas de tanques (series BL, BR, A, B, C, D, E, F, G, H, I, J, K, L)
-- ✅ Cálculos bidireccionales: espacio → galones y galones → espacio
-- ✅ Visualización en tiempo real del nivel de llenado
+- ✅ Cálculos bidireccionales: espacio → galones y galones → espacio (con cálculo proporcional corregido)
+- ✅ Visualización en tiempo real del nivel de llenado con gradiente nativo
 - ✅ Historial de búsquedas con AsyncStorage
 - ✅ Interfaz dark mode con tema premium
 - ✅ Optimizada para iPhone y iPad
@@ -23,15 +25,44 @@ La aplicación incluye:
 ./start-expo.sh
 ```
 
-Luego:
+Este script automáticamente:
+- Instala las dependencias de Expo en `mobile/` si es necesario
+- Inicia el servidor de Expo con túnel
+- Muestra el QR code para escanear
+
+**Luego:**
 1. Instala "Expo Go" en tu iPhone desde el App Store
 2. Escanea el QR code que aparece en la terminal
 3. ¡La app se cargará en tu iPhone!
+
+### Archivos del Proyecto Móvil
+
+```
+mobile/
+├── src/
+│   ├── components/TankVisual.tsx      # Visualización de tanque con LinearGradient
+│   ├── data/tankData.ts              # 160+ tanques (12 series)
+│   ├── hooks/useTankCalculator.ts     # Lógica de cálculo corregida
+│   └── screens/CalculatorScreen.tsx   # Pantalla principal
+├── assets/                            # Iconos y assets
+├── App.tsx                            # Punto de entrada
+├── app.json                           # Configuración de Expo con bundle ID
+├── eas.json                           # Configuración de EAS Build para App Store
+└── package.json                       # Dependencias de Expo (separadas de la raíz)
+```
 
 ### Documentación Completa
 
 - **Instrucciones de inicio**: Ver `mobile/INSTRUCCIONES-INICIO.md`
 - **Publicación en App Store**: Ver `mobile/README.md`
+
+## Nota Técnica
+
+El proyecto mantiene dos package.json separados:
+- **Raíz**: Dependencias de la web app anterior (React 18, no se usa actualmente)
+- **mobile/**: Dependencias de Expo (React 19.1.0, React Native, AsyncStorage, etc.)
+
+El script `start-expo.sh` instala y ejecuta desde `mobile/` automáticamente.
 
 ## User Preferences
 
