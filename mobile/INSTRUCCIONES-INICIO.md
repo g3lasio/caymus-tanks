@@ -6,10 +6,16 @@
 ./start-expo.sh
 ```
 
-## Opción 2: Desde el Directorio mobile/
+Este script automáticamente:
+- Instala las dependencias si es necesario
+- Inicia el servidor de Expo
+- Muestra el QR code para escanear
+
+## Opción 2: Desde el Directorio mobile/ (Manual)
 
 ```bash
 cd mobile
+npm install  # Solo la primera vez
 npx expo start --tunnel
 ```
 
