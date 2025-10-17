@@ -1,10 +1,37 @@
-# Caymus Wine Tank Calculator
+# Caymus Wine Tank Calculator - iOS Native App
 
 ## Overview
 
-The Caymus Wine Tank Calculator is a specialized web application designed for the wine industry to calculate tank volume measurements. The application converts between space measurements (in inches) and volume measurements (in gallons) for various wine storage tanks. It features a modern React frontend with a Node.js/Express backend, designed to handle precise calculations for winery operations.
+La Caymus Wine Tank Calculator es una aplicación móvil nativa para iOS diseñada para la industria del vino. Permite calcular medidas de volumen de tanques, convirtiendo entre medidas de espacio (en pulgadas) y volumen (en galones) para varios tanques de almacenamiento de vino Caymus.
 
-The system includes comprehensive tank specifications for different tank series (BL, BR, A, B, C) and provides both space-to-gallons and gallons-to-space conversion calculations. It features a dark, premium UI design that reflects the wine industry aesthetic with real-time tank visualizations and calculation history.
+**IMPORTANTE: Este proyecto ahora es una aplicación React Native con Expo, NO una web app. El código se encuentra en el directorio `mobile/`.**
+
+La aplicación incluye:
+- ✅ Especificaciones completas de tanques (series BL, BR, A, B, C, D, E, F, G, H, I, J, K, L)
+- ✅ Cálculos bidireccionales: espacio → galones y galones → espacio
+- ✅ Visualización en tiempo real del nivel de llenado
+- ✅ Historial de búsquedas con AsyncStorage
+- ✅ Interfaz dark mode con tema premium
+- ✅ Optimizada para iPhone y iPad
+- ✅ Lista para publicación en App Store
+
+## Cómo Iniciar la App
+
+### Inicio Rápido
+
+```bash
+./start-expo.sh
+```
+
+Luego:
+1. Instala "Expo Go" en tu iPhone desde el App Store
+2. Escanea el QR code que aparece en la terminal
+3. ¡La app se cargará en tu iPhone!
+
+### Documentación Completa
+
+- **Instrucciones de inicio**: Ver `mobile/INSTRUCCIONES-INICIO.md`
+- **Publicación en App Store**: Ver `mobile/README.md`
 
 ## User Preferences
 
