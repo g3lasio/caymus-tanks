@@ -43,8 +43,9 @@ export const useTankCalculator = () => {
     const adjustedInches = emptySpaceInches - tankData.TOP_INCHES;
     
     if (adjustedInches < 0) {
-      convertedGallons = tankData.GALS_IN_TOP;
-      topSectionGallons = tankData.GALS_IN_TOP;
+      const topSectionEmptyGallons = (emptySpaceInches / tankData.TOP_INCHES) * tankData.GALS_IN_TOP;
+      convertedGallons = topSectionEmptyGallons;
+      topSectionGallons = topSectionEmptyGallons;
       mainBodyGallons = 0;
     } else {
       const mainBodyEmptyGallons = adjustedInches * tankData.GALS_PER_INCH;
