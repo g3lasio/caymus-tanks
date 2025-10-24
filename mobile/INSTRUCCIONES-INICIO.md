@@ -1,5 +1,11 @@
 # 🚀 Cómo Iniciar la App Caymus Calculator
 
+## ⚠️ IMPORTANTE: Primera Ejecución
+
+**Los errores de TypeScript en `mobile/index.ts` y `mobile/App.tsx` son normales antes de la primera ejecución.**
+
+Estos errores desaparecerán automáticamente cuando ejecutes el script por primera vez, ya que instalará las dependencias de Expo.
+
 ## Opción 1: Desde la Raíz del Proyecto (Recomendado)
 
 ```bash
@@ -7,9 +13,10 @@
 ```
 
 Este script automáticamente:
-- Instala las dependencias si es necesario
-- Inicia el servidor de Expo
-- Muestra el QR code para escanear
+- ✅ Instala las dependencias si es necesario (primera vez: ~2-3 minutos)
+- ✅ Inicia el servidor de Expo con túnel
+- ✅ Muestra el QR code para escanear
+- ✅ Resuelve los errores de TypeScript
 
 ## Opción 2: Desde el Directorio mobile/ (Manual)
 

@@ -19,6 +19,10 @@ La aplicación incluye:
 
 ## Cómo Iniciar la App
 
+### ⚠️ Nota Importante
+
+Los errores de TypeScript en `mobile/index.ts` y `mobile/App.tsx` son **normales antes de la primera ejecución**. Se resolverán automáticamente cuando ejecutes el script y se instalen las dependencias.
+
 ### Inicio Rápido
 
 ```bash
@@ -26,9 +30,10 @@ La aplicación incluye:
 ```
 
 Este script automáticamente:
-- Instala las dependencias de Expo en `mobile/` si es necesario
+- Instala las dependencias de Expo en `mobile/` si es necesario (primera vez: ~2-3 min)
 - Inicia el servidor de Expo con túnel
 - Muestra el QR code para escanear
+- Resuelve los errores de TypeScript
 
 **Luego:**
 1. Instala "Expo Go" en tu iPhone desde el App Store
