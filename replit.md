@@ -58,8 +58,10 @@ mobile/
 
 ### Documentación Completa
 
-- **Instrucciones de inicio**: Ver `mobile/INSTRUCCIONES-INICIO.md`
-- **Publicación en App Store**: Ver `mobile/README.md`
+- **🚀 Inicio rápido**: `mobile/INSTRUCCIONES-INICIO.md`
+- **📦 Publicación (iOS/Android)**: `mobile/PUBLICACION-GUIA-COMPLETA.md`
+- **🎨 Assets requeridos**: `mobile/ASSETS-REQUERIDOS.md`
+- **📖 README general**: `mobile/README.md`
 
 ## Nota Técnica
 

@@ -1,137 +1,161 @@
-# Caymus Wine Tank Calculator - iOS App
+# 🍷 Caymus Wine Tank Calculator - Mobile App
 
-Aplicación móvil nativa para iOS que permite calcular volúmenes de tanques de vino Caymus.
+Aplicación móvil nativa para iOS y Android que permite calcular volúmenes de tanques de vino Caymus.
 
-## Características
+## ✨ Características
 
 - ✅ Cálculo bidireccional: espacio → galones y galones → espacio
-- ✅ Soporte para múltiples series de tanques (BL, BR, A, B, C, D, E, F, G, H, I, J, K, L)
+- ✅ 160+ tanques soportados (series BL, BR, A-L)
 - ✅ Visualización en tiempo real del nivel de llenado
-- ✅ Historial de búsquedas con AsyncStorage
-- ✅ Interfaz dark mode con tema premium de vinos
-- ✅ Diseño optimizado para iPhone y iPad
+- ✅ Historial de búsquedas persistente
+- ✅ Interfaz dark mode premium
+- ✅ Optimizado para iPhone, iPad y Android
 
-## Requisitos para Publicación en App Store
+## 🚀 Inicio Rápido
 
-### 1. Cuenta de Apple Developer
-- Inscríbete en el [Apple Developer Program](https://developer.apple.com/programs/) ($99/año)
-- Obtén tu Apple ID, Team ID y App ID
+### Para Desarrollo Local
 
-### 2. Cuenta de Expo
-- Crea una cuenta gratuita en [Expo.dev](https://expo.dev)
-- Instala Expo CLI: `npm install -g eas-cli`
-- Inicia sesión: `eas login`
+```bash
+# Desde la raíz del proyecto
+./start-expo.sh
+```
 
-## Pasos para Publicar en App Store
+Luego escanea el QR code con Expo Go en tu dispositivo.
 
-### Paso 1: Configurar Credenciales de iOS
+**Más detalles**: Ver `INSTRUCCIONES-INICIO.md`
+
+## 📦 Publicación en App Store / Google Play
+
+**⚠️ IMPORTANTE**: Antes de publicar, necesitas:
+
+1. **Configurar Expo Project ID**
+2. **Reemplazar assets placeholder** con imágenes de producción (1024×1024)
+3. **Configurar credenciales** de Apple Developer / Google Play
+
+### Guías Completas
+
+- **📖 Guía de Publicación Completa**: `PUBLICACION-GUIA-COMPLETA.md`
+- **🎨 Especificaciones de Assets**: `ASSETS-REQUERIDOS.md`
+- **🔧 Instrucciones de Inicio**: `INSTRUCCIONES-INICIO.md`
+
+### Publicación Rápida (Resumen)
 
 ```bash
 cd mobile
-eas build:configure
-```
 
-### Paso 2: Construir para iOS
+# 1. Inicializar proyecto Expo (primera vez)
+eas init
 
-```bash
-# Build para pruebas en dispositivo
-eas build --platform ios --profile preview
+# 2. Configurar credenciales
+eas credentials
 
-# Build para App Store
+# 3. Build para iOS
 eas build --platform ios --profile production
+
+# 4. Build para Android
+eas build --platform android --profile production
+
+# 5. Submit a stores
+eas submit --platform ios
+eas submit --platform android
 ```
 
-### Paso 3: Probar en tu iPhone
+**Detalles completos en**: `PUBLICACION-GUIA-COMPLETA.md`
 
-1. Instala la app Expo Go en tu iPhone desde el App Store
-2. Escanea el QR code que aparece al ejecutar:
-   ```bash
-   npx expo start
-   ```
-
-O si quieres probar el build de desarrollo:
-```bash
-eas build --platform ios --profile development
-```
-
-### Paso 4: Publicar en App Store
-
-Una vez que el build de producción esté listo:
-
-```bash
-eas submit --platform ios --latest
-```
-
-Necesitarás proporcionar:
-- Apple ID
-- App-specific password
-- Team ID
-- App ID
-
-### Paso 5: App Store Connect
-
-1. Ve a [App Store Connect](https://appstoreconnect.apple.com/)
-2. Completa la información de la app:
-   - Descripción
-   - Capturas de pantalla
-   - Palabras clave
-   - Categoría: Productividad o Negocios
-3. Envía para revisión
-
-## Desarrollo Local
-
-### Instalar dependencias
-
-Desde el directorio `mobile/`:
-```bash
-npm install
-```
-
-### Ejecutar en modo desarrollo
-
-```bash
-npm start
-```
-
-Luego:
-- Presiona `i` para abrir en iOS Simulator (requiere Mac)
-- Escanea el QR con la app Expo Go en tu iPhone
-
-### Actualizar la app después de publicar
-
-```bash
-# Actualización Over-The-Air (sin pasar por revisión de App Store para cambios menores)
-eas update --branch production --message "Descripción del cambio"
-```
-
-## Estructura del Proyecto
+## 🏗️ Estructura del Proyecto
 
 ```
 mobile/
 ├── src/
 │   ├── components/
-│   │   └── TankVisual.tsx       # Visualización del tanque
+│   │   └── TankVisual.tsx          # Visualización del tanque
 │   ├── data/
-│   │   └── tankData.ts          # Datos de especificaciones de tanques
+│   │   └── tankData.ts             # 160+ especificaciones de tanques
 │   ├── hooks/
-│   │   └── useTankCalculator.ts # Lógica de cálculo
+│   │   └── useTankCalculator.ts    # Lógica de cálculo
 │   └── screens/
-│       └── CalculatorScreen.tsx # Pantalla principal
-├── assets/
-│   ├── icon.png                 # Icono de la app
-│   └── caymus-logo.jpeg         # Logo de Caymus
-├── App.tsx                      # Punto de entrada
-├── app.json                     # Configuración de Expo
-├── eas.json                     # Configuración de EAS Build
-└── package.json                 # Dependencias
+│       └── CalculatorScreen.tsx    # Pantalla principal
+├── assets/                          # Iconos y splash screens
+├── App.tsx                          # Punto de entrada
+├── app.json                         # Configuración de Expo
+├── eas.json                         # Configuración de builds
+└── package.json                     # Dependencias
+
+Documentación/
+├── INSTRUCCIONES-INICIO.md         # Cómo ejecutar localmente
+├── PUBLICACION-GUIA-COMPLETA.md    # Guía paso a paso para publicar
+└── ASSETS-REQUERIDOS.md            # Especificaciones de imágenes
 ```
 
-## Soporte
+## 🛠️ Tecnologías
 
-Para problemas o preguntas sobre la publicación:
-- [Documentación de Expo EAS](https://docs.expo.dev/build/introduction/)
-- [Guía de App Store](https://developer.apple.com/app-store/review/guidelines/)
+- **Framework**: React Native 0.76.6
+- **SDK**: Expo 54
+- **Lenguaje**: TypeScript
+- **Persistencia**: AsyncStorage
+- **UI**: Componentes nativos + LinearGradient
+- **Build**: EAS Build
 
-## Licencia
+## 📝 Configuración Actual
 
-Propiedad de Caymus Vineyards.
+### iOS
+- **Bundle ID**: `com.caymus.tankcalculator`
+- **Versión**: 1.0.0
+- **Build Number**: 1
+
+### Android
+- **Package**: `com.caymus.tankcalculator`
+- **Version Code**: 1
+
+## 🔄 Actualizaciones OTA
+
+```bash
+# Publicar actualización instantánea (sin rebuild)
+eas update --branch production --message "Descripción"
+```
+
+Las actualizaciones OTA permiten cambios en JavaScript/UI sin necesidad de nueva revisión de las tiendas.
+
+## ⚙️ Dependencias Principales
+
+```json
+{
+  "expo": "~54.0.13",
+  "react": "18.2.0",
+  "react-native": "0.76.6",
+  "@react-native-async-storage/async-storage": "~2.1.0",
+  "expo-linear-gradient": "~14.0.1"
+}
+```
+
+## 🆘 Troubleshooting
+
+### Errores de TypeScript antes de primera ejecución
+**Normal**. Se resuelven automáticamente al ejecutar `./start-expo.sh` por primera vez.
+
+### Build falla
+```bash
+# Limpiar credenciales
+eas credentials --clear-credentials
+
+# Reconfigurar
+eas credentials
+```
+
+### Assets rechazados
+Verifica que los iconos sean 1024×1024 PNG. Ver `ASSETS-REQUERIDOS.md`.
+
+## 📚 Recursos
+
+- [Expo Documentation](https://docs.expo.dev)
+- [EAS Build](https://docs.expo.dev/build/introduction/)
+- [EAS Submit](https://docs.expo.dev/submit/introduction/)
+- [React Native Docs](https://reactnative.dev)
+
+## 📄 Licencia
+
+Propietario - Caymus Vineyards
+
+---
+
+**¿Listo para publicar?** Lee `PUBLICACION-GUIA-COMPLETA.md` para el proceso completo paso a paso.
