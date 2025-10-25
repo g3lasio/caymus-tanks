@@ -22,8 +22,16 @@ externalPort = 8081
 localPort = 8082
 externalPort = 3000
 
+[[ports]]
+localPort = 8083
+externalPort = 3001
+
+[[ports]]
+localPort = 8084
+externalPort = 3002
+
 [workflows]
-runButton = "Project"
+runButton = "Start Expo App"
 
 [[workflows.workflow]]
 name = "Project"
@@ -42,3 +50,12 @@ author = "agent"
 task = "shell.exec"
 args = "npm run dev"
 waitForPort = 5000
+
+[[workflows.workflow]]
+name = "Start Expo App"
+author = 36525909
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd mobile && npx expo start --tunnel"
