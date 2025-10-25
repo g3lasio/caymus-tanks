@@ -5,7 +5,7 @@ Aplicación móvil nativa para iOS y Android que permite calcular volúmenes de 
 ## ✨ Características
 
 - ✅ Cálculo bidireccional: espacio → galones y galones → espacio
-- ✅ 160+ tanques soportados (series BL, BR, A-L)
+- ✅ 166 tanques soportados (series BL, BR, A-L, incluyendo C10-C15)
 - ✅ Visualización en tiempo real del nivel de llenado
 - ✅ Historial de búsquedas persistente
 - ✅ Interfaz dark mode premium

@@ -9,7 +9,7 @@ La Caymus Wine Tank Calculator es una aplicación móvil nativa para iOS diseña
 El proyecto Expo completo está en el directorio `mobile/` con sus propias dependencias y configuración, independiente de la raíz del proyecto.
 
 La aplicación incluye:
-- ✅ Especificaciones completas de tanques (series BL, BR, A, B, C, D, E, F, G, H, I, J, K, L)
+- ✅ 166 tanques con especificaciones completas (series BL, BR, A-L, incluyendo C10-C15)
 - ✅ Cálculos bidireccionales: espacio → galones y galones → espacio (con cálculo proporcional corregido)
 - ✅ Visualización en tiempo real del nivel de llenado con gradiente nativo
 - ✅ Historial de búsquedas con AsyncStorage
