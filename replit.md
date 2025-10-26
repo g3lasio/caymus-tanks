@@ -19,26 +19,38 @@ La aplicación incluye:
 
 ## Cómo Iniciar la App
 
-### ⚠️ Nota Importante
+### 🚀 Método Recomendado: Publicar a Expo
 
-Los errores de TypeScript en `mobile/index.ts` y `mobile/App.tsx` son **normales antes de la primera ejecución**. Se resolverán automáticamente cuando ejecutes el script y se instalen las dependencias.
+Debido a restricciones de red en Replit, el método más confiable es publicar directamente a tu cuenta de Expo:
 
-### Inicio Rápido
+```bash
+./publicar-expo.sh
+```
+
+Este script:
+- Te pedirá login a Expo (primera vez)
+- Publicará la app a los servidores de Expo
+- Te permitirá acceder desde Expo Go sin QR code
+
+**Ventajas:**
+- ✅ Sin timeouts ni problemas de conexión
+- ✅ Acceso instantáneo desde cualquier lugar
+- ✅ Updates automáticos en tu iPhone
+- ✅ Puedes compartir con otros usuarios
+
+**Luego:**
+1. Abre "Expo Go" en tu iPhone
+2. Inicia sesión con tu cuenta de Expo
+3. Busca "Caymus Calculator" en tus proyectos
+4. ¡Toca para abrir!
+
+### 🔧 Método Alternativo: Servidor Local (Puede Fallar)
 
 ```bash
 ./start-expo.sh
 ```
 
-Este script automáticamente:
-- Instala las dependencias de Expo en `mobile/` si es necesario (primera vez: ~2-3 min)
-- Inicia el servidor de Expo con túnel
-- Muestra el QR code para escanear
-- Resuelve los errores de TypeScript
-
-**Luego:**
-1. Instala "Expo Go" en tu iPhone desde el App Store
-2. Escanea el QR code que aparece en la terminal
-3. ¡La app se cargará en tu iPhone!
+⚠️ Nota: El túnel puede tener timeouts en Replit. Usa el método de publicación si tienes problemas.
 
 ### Archivos del Proyecto Móvil
 
