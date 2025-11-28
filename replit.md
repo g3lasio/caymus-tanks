@@ -1,10 +1,10 @@
-# Caymus Wine Tank Calculator - iOS Native App
+# Caymus Wine Tank Calculator - iOS/Android Native App
 
 ## Overview
 
-La Caymus Wine Tank Calculator es una aplicación móvil nativa para iOS diseñada para la industria del vino. Permite calcular medidas de volumen de tanques, convirtiendo entre medidas de espacio (en pulgadas) y volumen (en galones) para varios tanques de almacenamiento de vino Caymus.
+La Caymus Wine Tank Calculator es una aplicación móvil nativa para iOS y Android diseñada para la industria del vino. Permite calcular medidas de volumen de tanques, convirtiendo entre medidas de espacio (en pulgadas) y volumen (en galones) para varios tanques de almacenamiento de vino Caymus.
 
-**IMPORTANTE: Este proyecto ahora es una aplicación React Native con Expo, NO una web app.**
+**IMPORTANTE: Este proyecto es una aplicación React Native con Expo, NO una web app.**
 
 El proyecto Expo completo está en el directorio `mobile/` con sus propias dependencias y configuración, independiente de la raíz del proyecto.
 
@@ -15,42 +15,41 @@ La aplicación incluye:
 - ✅ Historial de búsquedas con AsyncStorage
 - ✅ Interfaz dark mode con tema premium
 - ✅ Optimizada para iPhone y iPad
-- ✅ Lista para publicación en App Store
+- ✅ Configurada para publicación en App Store y Google Play
+- ✅ EAS Build configurado para generar IPA y APK/AAB
 
-## Cómo Iniciar la App
+## Cómo Probar la App en Desarrollo
 
-### 🚀 Método Recomendado: Publicar a Expo
-
-Debido a restricciones de red en Replit, el método más confiable es publicar directamente a tu cuenta de Expo:
+### 🚀 Método 1: Expo Go (Más Rápido)
 
 ```bash
 ./publicar-expo.sh
 ```
 
-Este script:
-- Te pedirá login a Expo (primera vez)
-- Publicará la app a los servidores de Expo
-- Te permitirá acceder desde Expo Go sin QR code
-
-**Ventajas:**
-- ✅ Sin timeouts ni problemas de conexión
-- ✅ Acceso instantáneo desde cualquier lugar
-- ✅ Updates automáticos en tu iPhone
-- ✅ Puedes compartir con otros usuarios
+Este script publica la app a Expo para acceso desde Expo Go sin QR code.
 
 **Luego:**
-1. Abre "Expo Go" en tu iPhone
-2. Inicia sesión con tu cuenta de Expo
+1. Abre "Expo Go" en tu iPhone/Android
+2. Inicia sesión con tu cuenta de Expo (@g3lasio)
 3. Busca "Caymus Calculator" en tus proyectos
 4. ¡Toca para abrir!
 
-### 🔧 Método Alternativo: Servidor Local (Puede Fallar)
+### 📦 Método 2: Archivos Instalables (IPA/APK)
 
-```bash
-./start-expo.sh
-```
+**Para crear archivos IPA (iOS) y APK/AAB (Android) listos para instalar o publicar en las tiendas:**
 
-⚠️ Nota: El túnel puede tener timeouts en Replit. Usa el método de publicación si tienes problemas.
+Ver guías detalladas:
+- **Guía rápida:** `mobile/PASOS-RAPIDOS-BUILDS.md`
+- **Guía completa:** `mobile/CREAR-BUILDS-IPA-APK.md`
+
+**Resumen:**
+1. Ve a https://expo.dev/accounts/g3lasio/projects/caymus-calculator/builds
+2. Click en "Create a build"
+3. Selecciona plataforma (iOS/Android) y perfil (preview/production)
+4. Espera 10-20 minutos
+5. Descarga el archivo IPA, APK o AAB
+
+**Project ID configurado:** `8583be63-c95e-4b16-8812-0b1c2ebee11e`
 
 ### Archivos del Proyecto Móvil
 
