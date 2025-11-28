@@ -31,6 +31,7 @@ export default function CalculatorScreen() {
   const [error, setError] = useState<string | null>(null);
   const [searchHistory, setSearchHistory] = useState<HistoryItem[]>([]);
   const [showHistory, setShowHistory] = useState<boolean>(false);
+  const [showTankList, setShowTankList] = useState<boolean>(false);
 
   const { 
     mode, 
@@ -103,10 +104,27 @@ export default function CalculatorScreen() {
     setSelectedTank(tankData[upperTankId] || null);
     setResult(null);
     setError(null);
+    setShowTankList(false);
     
     if (tankData[upperTankId]) {
       addToHistory(upperTankId);
     }
+  };
+
+  const getAllTankIds = (): string[] => {
+    return Object.keys(tankData).sort((a, b) => {
+      const getPrefix = (id: string) => id.replace(/\d+/g, '');
+      const getNumber = (id: string) => parseInt(id.replace(/\D/g, '')) || 0;
+      
+      const prefixA = getPrefix(a);
+      const prefixB = getPrefix(b);
+      
+      if (prefixA !== prefixB) {
+        return prefixA.localeCompare(prefixB);
+      }
+      
+      return getNumber(a) - getNumber(b);
+    });
   };
 
   const handleCalculate = () => {
@@ -174,23 +192,63 @@ export default function CalculatorScreen() {
           <Image 
             source={require('../../assets/caymus-logo.jpeg')} 
             style={styles.logo}
-            resizeMode="cover"
+            resizeMode="contain"
           />
-          <Text style={styles.title}>Caymus Calculator</Text>
         </View>
 
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>Selección de Tanque</Text>
           
-          <TextInput
-            style={styles.input}
-            value={selectedTankId}
-            onChangeText={handleSelectTank}
-            placeholder="Ingrese ID del tanque"
-            placeholderTextColor="#666"
-            autoCapitalize="characters"
-            maxLength={5}
-          />
+          <View style={styles.searchContainer}>
+            <TextInput
+              style={styles.input}
+              value={selectedTankId}
+              onChangeText={handleSelectTank}
+              placeholder="Ingrese ID del tanque"
+              placeholderTextColor="#666"
+              autoCapitalize="characters"
+              maxLength={5}
+            />
+            <TouchableOpacity 
+              style={styles.listButton}
+              onPress={() => setShowTankList(!showTankList)}
+              data-testid="button-toggle-tank-list"
+            >
+              <Text style={styles.listButtonText}>
+                {showTankList ? '▲ Ocultar' : '▼ Ver Todos'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {showTankList && (
+            <ScrollView 
+              style={styles.tankListContainer} 
+              nestedScrollEnabled={true}
+              showsVerticalScrollIndicator={true}
+            >
+              <View style={styles.tankGrid}>
+                {getAllTankIds().map((tankId, index) => (
+                  <View key={tankId} style={styles.tankItemWrapper}>
+                    <TouchableOpacity
+                      style={[
+                        styles.tankItem,
+                        selectedTankId === tankId && styles.tankItemSelected
+                      ]}
+                      onPress={() => handleSelectTank(tankId)}
+                      data-testid={`button-select-tank-${tankId}`}
+                    >
+                      <Text style={[
+                        styles.tankItemText,
+                        selectedTankId === tankId && styles.tankItemTextSelected
+                      ]}>
+                        {tankId}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                ))}
+              </View>
+            </ScrollView>
+          )}
 
           {selectedTankId && !selectedTank && (
             <Text style={styles.errorText}>No se encontró "{selectedTankId}"</Text>
@@ -218,23 +276,40 @@ export default function CalculatorScreen() {
             </View>
           )}
 
-          <View style={styles.tabContainer}>
-            <TouchableOpacity
-              style={[styles.tab, mode === 'spaceToGallons' && styles.activeTab]}
-              onPress={() => { setMode('spaceToGallons'); setResult(null); setError(null); }}
-            >
-              <Text style={[styles.tabText, mode === 'spaceToGallons' && styles.activeTabText]}>
-                Espacio → Galones
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.tab, mode === 'gallonsToSpace' && styles.activeTab]}
-              onPress={() => { setMode('gallonsToSpace'); setResult(null); setError(null); }}
-            >
-              <Text style={[styles.tabText, mode === 'gallonsToSpace' && styles.activeTabText]}>
-                Galones → Espacio
-              </Text>
-            </TouchableOpacity>
+          <View style={styles.toggleContainer}>
+            <Text style={styles.toggleLabel}>Modo de Cálculo</Text>
+            <View style={styles.toggleSwitch}>
+              <TouchableOpacity
+                style={[
+                  styles.toggleOption,
+                  mode === 'spaceToGallons' && styles.toggleOptionActive
+                ]}
+                onPress={() => { setMode('spaceToGallons'); setResult(null); setError(null); }}
+                data-testid="button-mode-space-to-gallons"
+              >
+                <Text style={[
+                  styles.toggleText,
+                  mode === 'spaceToGallons' && styles.toggleTextActive
+                ]}>
+                  Espacio → Galones
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.toggleOption,
+                  mode === 'gallonsToSpace' && styles.toggleOptionActive
+                ]}
+                onPress={() => { setMode('gallonsToSpace'); setResult(null); setError(null); }}
+                data-testid="button-mode-gallons-to-space"
+              >
+                <Text style={[
+                  styles.toggleText,
+                  mode === 'gallonsToSpace' && styles.toggleTextActive
+                ]}>
+                  Galones → Espacio
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
 
           {mode === 'spaceToGallons' ? (
@@ -324,6 +399,11 @@ export default function CalculatorScreen() {
             </View>
           )}
         </View>
+
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>© {new Date().getFullYear()} Chyrris Technologies</Text>
+          <Text style={styles.footerSubtext}>All rights reserved</Text>
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -343,22 +423,16 @@ const styles = StyleSheet.create({
   header: {
     width: '100%',
     backgroundColor: '#1a1a1a',
-    paddingVertical: 20,
+    paddingVertical: 24,
     paddingHorizontal: 20,
     borderBottomWidth: 2,
     borderBottomColor: '#d4af37',
     alignItems: 'center',
   },
   logo: {
-    width: 100,
-    height: 100,
-    borderRadius: 10,
-    marginBottom: 10,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#d4af37',
+    width: '80%',
+    height: 120,
+    maxWidth: 400,
   },
   card: {
     margin: 16,
@@ -374,6 +448,9 @@ const styles = StyleSheet.create({
     color: '#d4af37',
     marginBottom: 12,
   },
+  searchContainer: {
+    marginBottom: 12,
+  },
   input: {
     backgroundColor: '#0a0a0a',
     borderWidth: 1,
@@ -385,6 +462,60 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
     marginBottom: 8,
+  },
+  listButton: {
+    backgroundColor: '#0f0f0f',
+    borderWidth: 1,
+    borderColor: '#d4af37',
+    borderRadius: 8,
+    padding: 10,
+    alignItems: 'center',
+  },
+  listButtonText: {
+    color: '#d4af37',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  tankListContainer: {
+    maxHeight: 300,
+    backgroundColor: '#0f0f0f',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#333',
+    marginTop: 8,
+    marginBottom: 16,
+  },
+  tankGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    padding: 8,
+  },
+  tankItemWrapper: {
+    width: '50%',
+    padding: 4,
+  },
+  tankItem: {
+    backgroundColor: '#1a1a1a',
+    borderWidth: 1,
+    borderColor: '#444',
+    borderRadius: 6,
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    alignItems: 'center',
+    minHeight: 44,
+  },
+  tankItemSelected: {
+    backgroundColor: '#d4af37',
+    borderColor: '#d4af37',
+  },
+  tankItemText: {
+    color: '#888',
+    fontSize: 13,
+    fontWeight: '600',
+    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+  },
+  tankItemTextSelected: {
+    color: '#000',
   },
   errorText: {
     color: '#ff4444',
@@ -422,30 +553,42 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
   },
-  tabContainer: {
-    flexDirection: 'row',
+  toggleContainer: {
     marginBottom: 16,
-    borderRadius: 8,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: '#d4af37',
   },
-  tab: {
-    flex: 1,
-    padding: 12,
-    backgroundColor: '#0f0f0f',
-    alignItems: 'center',
-  },
-  activeTab: {
-    backgroundColor: '#d4af37',
-  },
-  tabText: {
+  toggleLabel: {
     color: '#888',
     fontSize: 14,
+    marginBottom: 8,
+    fontWeight: '500',
+  },
+  toggleSwitch: {
+    flexDirection: 'row',
+    backgroundColor: '#0f0f0f',
+    borderRadius: 25,
+    padding: 4,
+    borderWidth: 2,
+    borderColor: '#d4af37',
+  },
+  toggleOption: {
+    flex: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  toggleOptionActive: {
+    backgroundColor: '#d4af37',
+  },
+  toggleText: {
+    color: '#888',
+    fontSize: 13,
     fontWeight: '600',
   },
-  activeTabText: {
+  toggleTextActive: {
     color: '#000',
+    fontWeight: 'bold',
   },
   inputContainer: {
     marginBottom: 16,
@@ -552,5 +695,24 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+  },
+  footer: {
+    backgroundColor: '#1a1a1a',
+    borderTopWidth: 2,
+    borderTopColor: '#d4af37',
+    paddingVertical: 20,
+    paddingHorizontal: 20,
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  footerText: {
+    color: '#d4af37',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  footerSubtext: {
+    color: '#888',
+    fontSize: 12,
+    marginTop: 4,
   },
 });
