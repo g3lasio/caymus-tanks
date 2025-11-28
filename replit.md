@@ -13,10 +13,13 @@ La aplicación incluye:
 - ✅ Cálculos bidireccionales: espacio → galones y galones → espacio (con cálculo proporcional corregido)
 - ✅ Visualización en tiempo real del nivel de llenado con gradiente nativo
 - ✅ Historial de búsquedas con AsyncStorage
-- ✅ Interfaz dark mode con tema premium
+- ✅ Interfaz dark mode con tema premium dorado (#d4af37)
 - ✅ Optimizada para iPhone y iPad
 - ✅ Configurada para publicación en App Store y Google Play
 - ✅ EAS Build configurado para generar IPA y APK/AAB
+- ✅ Lista desplegable scrollable con todos los 166 tanques (grilla de 2 columnas)
+- ✅ Toggle switch elegante para selector de modo
+- ✅ Footer con copyright © 2025 Chyrris Technologies
 
 ## Cómo Probar la App en Desarrollo
 
@@ -82,9 +85,25 @@ El proyecto mantiene dos package.json separados:
 
 El script `start-expo.sh` instala y ejecuta desde `mobile/` automáticamente.
 
+## Recent Changes (Nov 28, 2025)
+
+### UI Improvements
+1. **Dropdown de Tanques**: Agregado botón "Ver Todos" que despliega lista scrollable con los 166 tanques en grilla de 2 columnas
+2. **Logo Optimizado**: Corregido resizeMode a "contain" para mostrar logo completo sin fragmentación
+3. **Header Simplificado**: Removido título redundante "Caymus Calculator" (ya está en el logo)
+4. **Footer Corporativo**: Agregado footer con "© 2025 Chyrris Technologies - All rights reserved"
+5. **Toggle Switch**: Rediseñado selector de modo de tabs rectangulares a toggle switch redondeado elegante
+
+### Technical Details
+- Layout responsive de 2 columnas con width: 50% para evitar overflow
+- ScrollView anidado con maxHeight: 300 para acceso a todos los tanques
+- Touch targets de 44px mínimo (iOS/Android guidelines)
+- Estilos consistentes con paleta dorada premium (#d4af37)
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+Company name: Chyrris Technologies
 
 ## System Architecture
 
