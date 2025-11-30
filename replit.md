@@ -72,13 +72,19 @@ El workflow "Start Expo App" inicia el servidor de desarrollo:
 
 ## Recent Changes (Nov 30, 2025)
 
-### Consolidación del Proyecto
-- Eliminados archivos duplicados de Expo en raíz (app.json, eas.json)
-- Eliminado directorio my-app no usado
-- Credenciales de Apple consolidadas en mobile/eas.json
-- Configurado .easignore para prevenir conflictos de dependencias
+### EAS Build Configurado
+- Build de Android iniciado exitosamente en EAS Build (servidores de Expo)
+- Keystore de Android generado localmente para builds automáticos
+- .easignore en raíz para ignorar dependencias web conflictivas
+- Slug cambiado a `caymus-calculator` para coincidir con proyecto EAS
+- Agregado ITSAppUsesNonExemptEncryption para iOS
 
-### UI Improvements
+### Estructura del Build
+- Android: Usa credenciales locales (credentials.json + release.keystore)
+- iOS: Requiere configuración interactiva una vez (certificados Apple)
+- Documentación completa en mobile/BUILD-INSTRUCTIONS.md
+
+### Cambios Anteriores
 - Header y footer fijos (no se mueven con scroll)
 - Grilla de tanques en 4 columnas (más compacta)
 - Buscador de tanque más pequeño (70px)
@@ -93,7 +99,7 @@ App name: Caymus Tanks
 ## Technical Stack
 
 - **Framework**: React Native 0.81.5 con Expo SDK 54
-- **React**: 19.1.0
+- **React**: 18.3.1 (requerido por Expo SDK 54)
 - **Lenguaje**: TypeScript
 - **Persistencia**: AsyncStorage
 - **Build**: EAS Build (cloud)
