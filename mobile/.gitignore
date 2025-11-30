@@ -39,3 +39,7 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# Security - Never commit
+release.keystore
+credentials.json
