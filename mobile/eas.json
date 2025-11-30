@@ -7,21 +7,19 @@
     "development": {
       "developmentClient": true,
       "distribution": "internal",
-      "channel": "development",
       "ios": {
-        "simulator": true,
-        "buildConfiguration": "Debug"
+        "simulator": true
       },
       "android": {
-        "buildType": "apk"
+        "buildType": "apk",
+        "credentialsSource": "remote"
       }
     },
     "preview": {
       "distribution": "internal",
-      "channel": "preview",
       "ios": {
         "simulator": false,
-        "buildConfiguration": "Release"
+        "credentialsSource": "remote"
       },
       "android": {
         "buildType": "apk",
@@ -30,14 +28,14 @@
     },
     "production": {
       "distribution": "store",
-      "channel": "production",
       "autoIncrement": true,
       "ios": {
         "simulator": false,
-        "buildConfiguration": "Release"
+        "credentialsSource": "remote"
       },
       "android": {
-        "buildType": "app-bundle"
+        "buildType": "app-bundle",
+        "credentialsSource": "remote"
       }
     }
   },
@@ -49,7 +47,6 @@
         "appleTeamId": "YOUR_APPLE_TEAM_ID"
       },
       "android": {
-        "serviceAccountKeyPath": "./path/to/google-service-account.json",
         "track": "internal"
       }
     }
