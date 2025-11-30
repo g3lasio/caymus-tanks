@@ -1,6 +1,6 @@
 {
   "cli": {
-    "version": ">= 15.0.0",
+    "version": ">= 16.28.0",
     "appVersionSource": "remote"
   },
   "build": {
@@ -31,7 +31,12 @@
       "autoIncrement": true,
       "ios": {
         "simulator": false,
-        "credentialsSource": "remote"
+        "credentialsSource": "remote",
+        "env": {
+          "ASC_API_KEY_ISSUER_ID": "82391172-0f9a-4156-b9f8-4674f2c17ccf",
+          "ASC_API_KEY_ID": "GBTBQYA2VP",
+          "APPLE_TEAM_ID": "UW276ZH5Q7"
+        }
       },
       "android": {
         "buildType": "app-bundle",
@@ -42,9 +47,7 @@
   "submit": {
     "production": {
       "ios": {
-        "appleId": "YOUR_APPLE_ID@example.com",
-        "ascAppId": "YOUR_ASC_APP_ID",
-        "appleTeamId": "YOUR_APPLE_TEAM_ID"
+        "appleTeamId": "UW276ZH5Q7"
       },
       "android": {
         "track": "internal"
