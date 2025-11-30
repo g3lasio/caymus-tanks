@@ -1,0 +1,15 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "09433807-1ff6-4a1e-85b3-3ad9876b72f5"
+      }
+    },
+    "ios": {
+      "bundleIdentifier": "com.g3lasio.restexpress",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    }
+  }
+}
