@@ -1,6 +1,8 @@
-# Ignore root web dependencies
+# Ignore root web dependencies completely
 node_modules/
 package-lock.json
+package.json
+yarn.lock
 
 # Ignore web server files
 server/
