@@ -7,6 +7,12 @@
     },
     "android": {
       "package": "com.gelasio.caymus"
+    },
+    "ios": {
+      "bundleIdentifier": "com.gelasio.caymus",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     }
   }
 }

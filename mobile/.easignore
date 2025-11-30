@@ -1,0 +1,27 @@
+# Ignore root web app files - EAS should only use mobile/
+# These paths are relative to the repository root
+../node_modules
+../package.json
+../package-lock.json
+../client
+../server
+../shared
+../dist
+../*.config.js
+../*.config.ts
+../vite.config.ts
+../drizzle.config.ts
+../tailwind.config.ts
+../postcss.config.js
+../.replit
+../replit.nix
+../replit.md
+../attached_assets
+
+# Local development files (in mobile/)
+node_modules
+.expo
+*.log
+android/.gradle
+android/build
+android/app/build

@@ -12,10 +12,21 @@
       "distribution": "internal"
     },
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "ios": {
+        "env": {
+          "ASC_API_KEY_ISSUER_ID": "82391172-0f9a-4156-b9f8-4674f2c17ccf",
+          "ASC_API_KEY_ID": "GBTBQYA2VP",
+          "APPLE_TEAM_ID": "UW276ZH5Q7"
+        }
+      }
     }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "ios": {
+        "appleTeamId": "UW276ZH5Q7"
+      }
+    }
   }
 }
