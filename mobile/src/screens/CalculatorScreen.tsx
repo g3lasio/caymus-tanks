@@ -199,23 +199,23 @@ export default function CalculatorScreen() {
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>Selección de Tanque</Text>
           
-          <View style={styles.searchContainer}>
+          <View style={styles.searchRow}>
             <TextInput
-              style={styles.input}
+              style={styles.searchInput}
               value={selectedTankId}
               onChangeText={handleSelectTank}
-              placeholder="Ingrese ID del tanque"
+              placeholder="ID"
               placeholderTextColor="#666"
               autoCapitalize="characters"
-              maxLength={5}
+              maxLength={4}
             />
             <TouchableOpacity 
-              style={styles.listButton}
+              style={styles.tankListButton}
               onPress={() => setShowTankList(!showTankList)}
               data-testid="button-toggle-tank-list"
             >
-              <Text style={styles.listButtonText}>
-                {showTankList ? '▲ Ocultar' : '▼ Ver Todos'}
+              <Text style={styles.tankListButtonText}>
+                {showTankList ? '▲ Tanques' : '▼ Tanques'}
               </Text>
             </TouchableOpacity>
           </View>
@@ -225,26 +225,26 @@ export default function CalculatorScreen() {
               style={styles.tankListContainer} 
               nestedScrollEnabled={true}
               showsVerticalScrollIndicator={true}
+              persistentScrollbar={true}
             >
               <View style={styles.tankGrid}>
-                {getAllTankIds().map((tankId, index) => (
-                  <View key={tankId} style={styles.tankItemWrapper}>
-                    <TouchableOpacity
-                      style={[
-                        styles.tankItem,
-                        selectedTankId === tankId && styles.tankItemSelected
-                      ]}
-                      onPress={() => handleSelectTank(tankId)}
-                      data-testid={`button-select-tank-${tankId}`}
-                    >
-                      <Text style={[
-                        styles.tankItemText,
-                        selectedTankId === tankId && styles.tankItemTextSelected
-                      ]}>
-                        {tankId}
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
+                {getAllTankIds().map((tankId) => (
+                  <TouchableOpacity
+                    key={tankId}
+                    style={[
+                      styles.tankGridItem,
+                      selectedTankId === tankId && styles.tankGridItemSelected
+                    ]}
+                    onPress={() => handleSelectTank(tankId)}
+                    data-testid={`button-select-tank-${tankId}`}
+                  >
+                    <Text style={[
+                      styles.tankGridText,
+                      selectedTankId === tankId && styles.tankGridTextSelected
+                    ]}>
+                      {tankId}
+                    </Text>
+                  </TouchableOpacity>
                 ))}
               </View>
             </ScrollView>
@@ -448,73 +448,73 @@ const styles = StyleSheet.create({
     color: '#d4af37',
     marginBottom: 12,
   },
-  searchContainer: {
+  searchRow: {
+    flexDirection: 'row',
+    gap: 10,
     marginBottom: 12,
   },
-  input: {
+  searchInput: {
+    width: 70,
     backgroundColor: '#0a0a0a',
     borderWidth: 1,
     borderColor: '#d4af37',
     borderRadius: 8,
-    padding: 12,
-    fontSize: 18,
+    padding: 10,
+    fontSize: 16,
     color: '#fff',
     textAlign: 'center',
     fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
-    marginBottom: 8,
   },
-  listButton: {
+  tankListButton: {
+    flex: 1,
     backgroundColor: '#0f0f0f',
     borderWidth: 1,
     borderColor: '#d4af37',
     borderRadius: 8,
-    padding: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
     alignItems: 'center',
+    justifyContent: 'center',
   },
-  listButtonText: {
+  tankListButtonText: {
     color: '#d4af37',
     fontSize: 14,
     fontWeight: '600',
   },
   tankListContainer: {
-    maxHeight: 300,
+    maxHeight: 160,
     backgroundColor: '#0f0f0f',
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#333',
-    marginTop: 8,
-    marginBottom: 16,
+    marginBottom: 12,
   },
   tankGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    padding: 8,
+    padding: 6,
   },
-  tankItemWrapper: {
-    width: '50%',
-    padding: 4,
-  },
-  tankItem: {
+  tankGridItem: {
+    width: '25%',
     backgroundColor: '#1a1a1a',
     borderWidth: 1,
-    borderColor: '#444',
-    borderRadius: 6,
-    paddingVertical: 12,
-    paddingHorizontal: 8,
+    borderColor: '#333',
+    paddingVertical: 8,
+    paddingHorizontal: 4,
     alignItems: 'center',
-    minHeight: 44,
+    minHeight: 36,
   },
-  tankItemSelected: {
+  tankGridItemSelected: {
     backgroundColor: '#d4af37',
     borderColor: '#d4af37',
   },
-  tankItemText: {
+  tankGridText: {
     color: '#888',
-    fontSize: 13,
+    fontSize: 11,
     fontWeight: '600',
     fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
   },
-  tankItemTextSelected: {
+  tankGridTextSelected: {
     color: '#000',
   },
   errorText: {
