@@ -1,26 +1,27 @@
-# Ignore root web dependencies completely
+# Ignore root web project files that conflict with Expo
 node_modules/
 package-lock.json
-package.json
 yarn.lock
 
-# Ignore web server files
+# Ignore web server files  
 server/
 client/
 shared/
 dist/
-vite.config.ts
-tailwind.config.ts
-postcss.config.mjs
+*.config.ts
+*.config.js
+*.config.mjs
 drizzle.config.ts
+postcss.config.mjs
 
-# Ignore backup
+# Ignore backup and dev files
 backup/
-
-# Ignore replit files
 .replit
 replit.nix
 replit.md
 
 # Ignore git
 .git/
+
+# Note: package.json in root will be uploaded but EAS should use mobile/package.json
+# when running from mobile/ directory
