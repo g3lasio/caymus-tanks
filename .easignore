@@ -1,33 +1,24 @@
-# EAS Build should only use mobile/ directory
-# Ignore everything in root except mobile/
-
-# Root level files that conflict
-package.json
-package-lock.json
+# Ignore root web dependencies
 node_modules/
+package-lock.json
 
-# Web app directories
-client/
+# Ignore web server files
 server/
+client/
 shared/
 dist/
-backup/
-attached_assets/
-
-# Config files
-*.config.js
-*.config.ts
 vite.config.ts
-drizzle.config.ts
 tailwind.config.ts
-postcss.config.js
-tsconfig.json
+postcss.config.mjs
+drizzle.config.ts
 
-# Replit files
+# Ignore backup
+backup/
+
+# Ignore replit files
 .replit
 replit.nix
 replit.md
-.upm/
-.cache/
-.config/
-.local/
+
+# Ignore git
+.git/

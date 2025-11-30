@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Caymus Tanks",
-    "slug": "caymus-tanks",
+    "slug": "caymus-calculator",
     "version": "1.0.0",
     "sdkVersion": "54.0.0",
     "orientation": "portrait",
@@ -20,7 +20,8 @@
       "bundleIdentifier": "com.caymus.tankcalculator",
       "buildNumber": "1",
       "infoPlist": {
-        "UIBackgroundModes": []
+        "UIBackgroundModes": [],
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
@@ -42,9 +43,7 @@
         "projectId": "8583be63-c95e-4b16-8812-0b1c2ebee11e"
       }
     },
-    "runtimeVersion": {
-      "policy": "appVersion"
-    },
+    "runtimeVersion": "1.0.0",
     "updates": {
       "url": "https://u.expo.dev/8583be63-c95e-4b16-8812-0b1c2ebee11e"
     }
