@@ -187,15 +187,16 @@ export default function CalculatorScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <StatusBar style="light" />
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
-        <View style={styles.header}>
-          <Image 
-            source={require('../../assets/caymus-logo.jpeg')} 
-            style={styles.logo}
-            resizeMode="contain"
-          />
-        </View>
+      
+      <View style={styles.header}>
+        <Image 
+          source={require('../../assets/caymus-logo.jpeg')} 
+          style={styles.logo}
+          resizeMode="contain"
+        />
+      </View>
 
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>Selección de Tanque</Text>
           
@@ -399,12 +400,12 @@ export default function CalculatorScreen() {
             </View>
           )}
         </View>
-
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>© {new Date().getFullYear()} Chyrris Technologies</Text>
-          <Text style={styles.footerSubtext}>All rights reserved</Text>
-        </View>
       </ScrollView>
+
+      <View style={styles.footer}>
+        <Text style={styles.footerText}>© {new Date().getFullYear()} Chyrris Technologies</Text>
+        <Text style={styles.footerSubtext}>All rights reserved</Text>
+      </View>
     </KeyboardAvoidingView>
   );
 }
@@ -700,9 +701,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#1a1a1a',
     borderTopWidth: 2,
     borderTopColor: '#d4af37',
-    paddingVertical: 20,
+    paddingVertical: 16,
     paddingHorizontal: 20,
-    marginTop: 20,
     alignItems: 'center',
   },
   footerText: {
