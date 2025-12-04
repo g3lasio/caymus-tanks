@@ -338,6 +338,15 @@ const Calculator = () => {
             <div className="rounded-lg p-4" style={{ backgroundColor: '#0f0f0f', border: '1px solid #d4af37' }}>
               <h3 className="text-lg font-semibold mb-4" style={{ color: '#d4af37' }}>Resultado</h3>
               
+              {/* Advertencia cuando la medida está dentro de la campana */}
+              {mode === 'spaceToGallons' && parseFloat(inchesSpace) > 0 && parseFloat(inchesSpace) < selectedTank.TOP_INCHES && (
+                <div className="rounded-lg p-3 mb-4" style={{ backgroundColor: '#332200', border: '1px solid #d4af37' }}>
+                  <p className="text-xs" style={{ color: '#d4af37' }}>
+                    ⚠️ Medida dentro de la campana (zona cónica). Precisión estimada: ~99%
+                  </p>
+                </div>
+              )}
+              
               <div className="flex justify-center mb-4">
                 <TankVisual 
                   fillPercentage={fillPercentage}

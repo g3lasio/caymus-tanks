@@ -366,6 +366,15 @@ export default function CalculatorScreen() {
             <View style={styles.resultsContainer}>
               <Text style={styles.resultsTitle}>Resultado</Text>
               
+              {/* Advertencia cuando la medida está dentro de la campana */}
+              {mode === 'spaceToGallons' && parseFloat(inchesSpace) > 0 && parseFloat(inchesSpace) < selectedTank.TOP_INCHES && (
+                <View style={styles.warningContainer}>
+                  <Text style={styles.warningText}>
+                    ⚠️ Medida dentro de la campana (zona cónica). Precisión estimada: ~99%
+                  </Text>
+                </View>
+              )}
+              
               <TankVisual fillPercentage={fillPercentage} />
               
               {isSpaceToGallons(result) && (
@@ -675,6 +684,18 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#d4af37',
     marginBottom: 16,
+  },
+  warningContainer: {
+    backgroundColor: '#332200',
+    borderWidth: 1,
+    borderColor: '#d4af37',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 12,
+  },
+  warningText: {
+    color: '#d4af37',
+    fontSize: 12,
   },
   resultValues: {
     marginTop: 16,
