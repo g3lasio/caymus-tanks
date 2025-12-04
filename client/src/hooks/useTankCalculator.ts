@@ -32,26 +32,26 @@ export const useTankCalculator = () => {
       throw new Error('Inches of space must be a non-negative number');
     }
 
-    // Fórmula original del script.js
-    const galonesEnCuerpo = (espacioEnPulgadas - tankData.TOP_INCHES) * tankData.GALS_PER_INCH;
-    const galonesTotales = galonesEnCuerpo + tankData.GALS_IN_TOP;
-    const totalGallons = tankData.TOTAL_GALS - galonesTotales;
-    
-    // Para el breakdown de secciones
     let mainBodyGallons = 0;
     let topSectionGallons = 0;
+    let galonesVacios = 0;
     
     if (espacioEnPulgadas <= tankData.TOP_INCHES) {
-      // Espacio vacío solo en la sección top
+      // CASO CAMPANA: Espacio vacío está solo dentro de la sección cónica (top)
+      // Usamos proporcionalidad lineal para el cono: pulgadas/altura_total × capacidad_total
       topSectionGallons = (espacioEnPulgadas / tankData.TOP_INCHES) * tankData.GALS_IN_TOP;
       mainBodyGallons = 0;
+      galonesVacios = topSectionGallons;
     } else {
-      // Espacio vacío incluye todo el top y parte del cuerpo
+      // CASO CUERPO: Espacio vacío incluye toda la campana + parte del cuerpo cilíndrico
+      // Fórmula original del script.js para el cuerpo cilíndrico
       topSectionGallons = tankData.GALS_IN_TOP;
       mainBodyGallons = (espacioEnPulgadas - tankData.TOP_INCHES) * tankData.GALS_PER_INCH;
+      galonesVacios = topSectionGallons + mainBodyGallons;
     }
 
-    const remainingGallons = galonesTotales;
+    const totalGallons = tankData.TOTAL_GALS - galonesVacios;
+    const remainingGallons = galonesVacios;
     const fillPercentage = (totalGallons / tankData.TOTAL_GALS) * 100;
 
     return {
@@ -71,24 +71,25 @@ export const useTankCalculator = () => {
       throw new Error(`Los galones deseados deben estar entre 0 y ${tankData.TOTAL_GALS.toFixed(2)}`);
     }
 
-    // Fórmula original del script.js
     const galonesEspacio = tankData.TOTAL_GALS - galonesDeseados;
     let requiredSpace = 0;
     let mainBodyInches = 0;
     let topSectionInches = 0;
 
     if (galonesEspacio <= tankData.GALS_IN_TOP) {
-      // El espacio vacío cabe en la sección top
-      requiredSpace = galonesEspacio / tankData.GALS_PER_INCH;
-      topSectionInches = requiredSpace;
+      // CASO CAMPANA: El espacio vacío cabe dentro de la sección cónica (top)
+      // Usamos proporcionalidad lineal inversa: galones/capacidad_total × altura_total
+      topSectionInches = (galonesEspacio / tankData.GALS_IN_TOP) * tankData.TOP_INCHES;
       mainBodyInches = 0;
+      requiredSpace = topSectionInches;
     } else {
-      // El espacio vacío incluye todo el top y parte del cuerpo
+      // CASO CUERPO: El espacio vacío incluye toda la campana + parte del cuerpo cilíndrico
+      // Fórmula original del script.js para el cuerpo cilíndrico
       const galonesCuerpo = galonesEspacio - tankData.GALS_IN_TOP;
       const pulgadasCuerpo = galonesCuerpo / tankData.GALS_PER_INCH;
-      requiredSpace = pulgadasCuerpo + tankData.TOP_INCHES;
       topSectionInches = tankData.TOP_INCHES;
       mainBodyInches = pulgadasCuerpo;
+      requiredSpace = topSectionInches + mainBodyInches;
     }
 
     const fillPercentage = (galonesDeseados / tankData.TOTAL_GALS) * 100;
