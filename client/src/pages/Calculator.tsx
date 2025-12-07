@@ -15,6 +15,17 @@ const Calculator = () => {
   const [error, setError] = useState<string | null>(null);
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
   const [showTankList, setShowTankList] = useState<boolean>(false);
+
+  // Calcular días restantes hasta el 5 de enero 2026
+  const getDaysRemaining = (): number => {
+    const targetDate = new Date('2026-01-05T00:00:00');
+    const today = new Date();
+    const diffTime = targetDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return Math.max(0, diffDays);
+  };
+  
+  const daysRemaining = getDaysRemaining();
   
   const { 
     mode, 
@@ -142,16 +153,14 @@ const Calculator = () => {
         />
       </header>
 
-      {/* Transition Banner */}
+      {/* Countdown Banner */}
       <div className="py-3 px-4 text-center" style={{ background: 'linear-gradient(to right, #b8860b, #d4af37)' }}>
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-2">
-          <span className="text-white font-semibold text-sm sm:text-base">
-            Muy pronto disponible en App Store y Google Play
-          </span>
-          <div className="flex gap-3">
-            <span className="bg-black/20 px-2 py-1 rounded text-white text-xs font-medium">iOS</span>
-            <span className="bg-black/20 px-2 py-1 rounded text-white text-xs font-medium">Android</span>
+        <div className="flex flex-col items-center justify-center gap-1">
+          <div className="flex items-center gap-2">
+            <span className="bg-black/30 px-3 py-1 rounded-lg text-white text-xl font-bold">{daysRemaining}</span>
+            <span className="text-white font-semibold text-sm">días para migrar a la app</span>
           </div>
+          <span className="text-white/80 text-xs">Esta web dejará de funcionar. Descarga Caymus Tanks en iOS o Android</span>
         </div>
       </div>
 
