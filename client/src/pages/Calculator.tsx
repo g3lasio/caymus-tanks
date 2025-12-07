@@ -1,10 +1,63 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import tankData, { TankData } from '@/data/tankData';
 import { useTankCalculator } from '@/hooks/useTankCalculator';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import TankVisual from '@/components/TankVisual';
 import caymusLogo from '@assets/caymus-logo.jpeg';
+
+const Snowfall = () => {
+  const snowflakes = useMemo(() => {
+    return Array.from({ length: 50 }, (_, i) => ({
+      id: i,
+      left: Math.random() * 100,
+      delay: Math.random() * 10,
+      duration: 10 + Math.random() * 10,
+      size: 2 + Math.random() * 4,
+      opacity: 0.3 + Math.random() * 0.4
+    }));
+  }, []);
+
+  return (
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '100%',
+      pointerEvents: 'none',
+      zIndex: 9999,
+      overflow: 'hidden'
+    }}>
+      {snowflakes.map((flake) => (
+        <div
+          key={flake.id}
+          style={{
+            position: 'absolute',
+            left: `${flake.left}%`,
+            top: '-10px',
+            width: `${flake.size}px`,
+            height: `${flake.size}px`,
+            backgroundColor: '#fff',
+            borderRadius: '50%',
+            opacity: flake.opacity,
+            animation: `snowfall ${flake.duration}s linear ${flake.delay}s infinite`
+          }}
+        />
+      ))}
+      <style>{`
+        @keyframes snowfall {
+          0% {
+            transform: translateY(-10px) rotate(0deg);
+          }
+          100% {
+            transform: translateY(100vh) rotate(360deg);
+          }
+        }
+      `}</style>
+    </div>
+  );
+};
 
 const Calculator = () => {
   const [selectedTankId, setSelectedTankId] = useState<string>('');
@@ -143,6 +196,9 @@ const Calculator = () => {
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#0a0a0a' }}>
+      {/* Snow Effect */}
+      <Snowfall />
+      
       {/* Header with Logo */}
       <header className="w-full py-6 px-5 flex items-center justify-center" style={{ backgroundColor: '#1a1a1a', borderBottom: '2px solid #d4af37' }}>
         <img 
