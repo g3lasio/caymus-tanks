@@ -211,13 +211,9 @@ const Calculator = () => {
 
       {/* Countdown Banner */}
       <div className="py-3 px-4 text-center" style={{ background: 'linear-gradient(to right, #b8860b, #d4af37)' }}>
-        <div className="flex flex-col items-center justify-center gap-1">
-          <div className="flex items-center gap-2">
-            <span className="bg-black/30 px-3 py-1 rounded-lg text-white text-xl font-bold">{daysRemaining}</span>
-            <span className="text-white font-semibold text-sm">días para migrar a la app</span>
-          </div>
-          <span className="text-white/80 text-xs">Esta web dejará de funcionar. Descarga Caymus Tanks en iOS o Android</span>
-        </div>
+        <p className="text-white font-semibold text-sm">
+          ¡Solo {daysRemaining} días para la migración! Este portal cerrará. Descarga Caymus Tanks en iOS/Android
+        </p>
       </div>
 
       {/* Main Content */}
