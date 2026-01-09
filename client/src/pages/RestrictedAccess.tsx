@@ -1,4 +1,4 @@
-import { Shield, Lock, Smartphone } from "lucide-react";
+import { Shield, Lock } from "lucide-react";
 
 export default function RestrictedAccess() {
   return (
@@ -25,27 +25,18 @@ export default function RestrictedAccess() {
           <div className="flex items-center justify-center gap-2 mb-6">
             <Lock className="w-5 h-5 text-slate-400" />
             <p className="text-slate-400 text-lg">
-              Esta aplicación solo está disponible en dispositivos móviles
+              Plataforma Web App con acceso restringido
             </p>
           </div>
 
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6 mb-8">
+          <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6">
             <div className="flex items-center justify-center gap-3 mb-4">
-              <Smartphone className="w-8 h-8 text-cyan-400" />
-              <span className="text-xl font-semibold text-white">Descarga nuestra App</span>
+              <Shield className="w-8 h-8 text-cyan-400" />
+              <span className="text-xl font-semibold text-white">Acceso por Seguridad</span>
             </div>
             <p className="text-slate-300">
-              Para acceder a todas las funcionalidades, descarga la aplicación desde la App Store o Google Play.
+              El acceso a esta plataforma está restringido por cuestiones de seguridad. Solo usuarios autorizados pueden acceder al sistema.
             </p>
-          </div>
-
-          <div className="flex justify-center gap-4">
-            <div className="px-6 py-3 bg-slate-800/60 backdrop-blur-sm border border-slate-600/50 rounded-xl text-slate-300 text-sm hover:border-cyan-500/50 transition-colors cursor-pointer">
-              App Store
-            </div>
-            <div className="px-6 py-3 bg-slate-800/60 backdrop-blur-sm border border-slate-600/50 rounded-xl text-slate-300 text-sm hover:border-purple-500/50 transition-colors cursor-pointer">
-              Google Play
-            </div>
           </div>
         </div>
       </div>
