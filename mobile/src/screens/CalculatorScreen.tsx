@@ -513,16 +513,16 @@ const styles = StyleSheet.create({
   header: {
     width: '100%',
     backgroundColor: '#112240',
-    paddingVertical: 24,
-    paddingHorizontal: 20,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
     borderBottomWidth: 2,
     borderBottomColor: '#00d4ff',
     alignItems: 'center',
   },
   logo: {
-    width: '80%',
-    height: 120,
-    maxWidth: 400,
+    width: '60%',
+    height: 60,
+    maxWidth: 280,
   },
   card: {
     margin: 16,
