@@ -366,11 +366,11 @@ export default function CalculatorScreen() {
             <View style={styles.resultsContainer}>
               <Text style={styles.resultsTitle}>Resultado</Text>
               
-              {/* Advertencia cuando la medida está dentro de la campana */}
-              {mode === 'spaceToGallons' && parseFloat(inchesSpace) > 0 && parseFloat(inchesSpace) < selectedTank.TOP_INCHES && (
-                <View style={styles.warningContainer}>
-                  <Text style={styles.warningText}>
-                    ⚠️ Medida dentro de la campana (zona cónica). Precisión estimada: ~99%
+              {/* Mensaje de precisión dinámico */}
+              {result && 'precisionMessage' in result && (
+                <View style={[styles.warningContainer, result.isInCampana ? styles.campanaWarning : styles.bodySuccess]}>
+                  <Text style={[styles.warningText, !result.isInCampana && styles.successText]}>
+                    {result.precisionMessage}
                   </Text>
                 </View>
               )}
@@ -693,9 +693,21 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 12,
   },
+  campanaWarning: {
+    backgroundColor: '#332200',
+    borderColor: '#d4af37',
+  },
+  bodySuccess: {
+    backgroundColor: '#113311',
+    borderColor: '#44aa44',
+  },
   warningText: {
     color: '#d4af37',
-    fontSize: 12,
+    fontSize: 13,
+    textAlign: 'center',
+  },
+  successText: {
+    color: '#44aa44',
   },
   resultValues: {
     marginTop: 16,
