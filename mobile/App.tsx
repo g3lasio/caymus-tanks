@@ -1,5 +1,8 @@
-import CalculatorScreen from './src/screens/CalculatorScreen';
+/**
+ * Punto de entrada principal - Caymus Tank Calculator
+ * Propiedad de Chyrris Technologies Inc.
+ */
 
-export default function App() {
-  return <CalculatorScreen />;
-}
+import App from './src/App';
+
+export default App;

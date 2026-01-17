@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { 
   View, 
   Text, 
@@ -16,6 +16,7 @@ import tankData, { TankData } from '../data/tankData';
 import { useTankCalculator } from '../hooks/useTankCalculator';
 import TankVisual from '../components/TankVisual';
 import FloatingMenu from '../components/FloatingMenu';
+import { TRANSLATIONS, Language } from '../i18n/translations';
 
 interface HistoryItem {
   tankId: string;
@@ -31,11 +32,13 @@ export default function CalculatorScreen() {
   const [desiredGallons, setDesiredGallons] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
   const [searchHistory, setSearchHistory] = useState<HistoryItem[]>([]);
-  const [showHistory, setShowHistory] = useState<boolean>(false);
   const [showTankList, setShowTankList] = useState<boolean>(false);
   const [tankSearch, setTankSearch] = useState<string>('');
-  const [backgroundColor, setBackgroundColor] = useState<string>('#0a1628');
-  const [language, setLanguage] = useState<'es' | 'en'>('es');
+  const [language, setLanguage] = useState<Language>('es');
+  const [menuOpen, setMenuOpen] = useState<boolean>(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+
+  const t = TRANSLATIONS[language];
 
   const { 
     mode, 
@@ -53,6 +56,8 @@ export default function CalculatorScreen() {
 
   useEffect(() => {
     loadHistory();
+    loadPreferences();
+    checkAuthStatus();
   }, []);
 
   const loadHistory = async () => {
@@ -63,6 +68,24 @@ export default function CalculatorScreen() {
       }
     } catch (e) {
       console.error('Error loading history', e);
+    }
+  };
+
+  const loadPreferences = async () => {
+    try {
+      const savedLang = await AsyncStorage.getItem('language');
+      if (savedLang) setLanguage(savedLang as Language);
+    } catch (e) {
+      console.error('Error loading preferences', e);
+    }
+  };
+
+  const checkAuthStatus = async () => {
+    try {
+      const authToken = await AsyncStorage.getItem('authToken');
+      setIsAuthenticated(!!authToken);
+    } catch (e) {
+      console.error('Error checking auth status', e);
     }
   };
 
@@ -87,16 +110,7 @@ export default function CalculatorScreen() {
     handleSelectTank(tankId);
   };
 
-  const handleChangeBackgroundColor = async (color: string) => {
-    setBackgroundColor(color);
-    try {
-      await AsyncStorage.setItem('backgroundColor', color);
-    } catch (e) {
-      console.error('Error saving background color', e);
-    }
-  };
-
-  const handleChangeLanguage = async (lang: 'es' | 'en') => {
+  const handleChangeLanguage = async (lang: Language) => {
     setLanguage(lang);
     try {
       await AsyncStorage.setItem('language', lang);
@@ -105,20 +119,17 @@ export default function CalculatorScreen() {
     }
   };
 
-  // Cargar preferencias guardadas
-  useEffect(() => {
-    const loadPreferences = async () => {
-      try {
-        const savedBgColor = await AsyncStorage.getItem('backgroundColor');
-        const savedLang = await AsyncStorage.getItem('language');
-        if (savedBgColor) setBackgroundColor(savedBgColor);
-        if (savedLang) setLanguage(savedLang as 'es' | 'en');
-      } catch (e) {
-        console.error('Error loading preferences', e);
-      }
-    };
-    loadPreferences();
-  }, []);
+  const handleLogout = async () => {
+    try {
+      await AsyncStorage.removeItem('authToken');
+      await AsyncStorage.removeItem('userPhone');
+      await AsyncStorage.removeItem('deviceId');
+      setIsAuthenticated(false);
+      // En producción, aquí navegaríamos a la pantalla de login
+    } catch (e) {
+      console.error('Error logging out', e);
+    }
+  };
 
   const addToHistory = (tankId: string) => {
     if (!tankId || !tankData[tankId]) return;
@@ -128,10 +139,10 @@ export default function CalculatorScreen() {
     if (result) {
       if (mode === 'spaceToGallons' && isSpaceToGallons(result)) {
         const inches = parseFloat(inchesSpace);
-        info = `${inches} pulg. → ${formatNumber(result.totalGallons)} gal.`;
+        info = `${inches} ${language === 'es' ? 'pulg.' : 'in.'} → ${formatNumber(result.totalGallons)} gal.`;
       } else if (mode === 'gallonsToSpace' && isGallonsToSpace(result)) {
         const gallons = parseFloat(desiredGallons);
-        info = `${formatNumber(gallons)} gal. → ${formatNumber(result.requiredSpace)} pulg.`;
+        info = `${formatNumber(gallons)} gal. → ${formatNumber(result.requiredSpace)} ${language === 'es' ? 'pulg.' : 'in.'}`;
       }
     }
     
@@ -190,7 +201,7 @@ export default function CalculatorScreen() {
 
   const handleCalculate = () => {
     if (!selectedTank) {
-      setError('Por favor selecciona un tanque primero');
+      setError(t.selectTankFirst);
       return;
     }
 
@@ -198,7 +209,7 @@ export default function CalculatorScreen() {
       if (mode === 'spaceToGallons') {
         const spaceValue = parseFloat(inchesSpace);
         if (isNaN(spaceValue) || spaceValue < 0) {
-          setError('Por favor ingresa un número válido de pulgadas');
+          setError(t.invalidInches);
           return;
         }
         const calculationResult = calculate(selectedTank, spaceValue);
@@ -214,7 +225,7 @@ export default function CalculatorScreen() {
       } else {
         const gallonsValue = parseFloat(desiredGallons);
         if (isNaN(gallonsValue) || gallonsValue < 0 || gallonsValue > selectedTank.TOTAL_GALS) {
-          setError(`Por favor ingresa un número válido de galones entre 0 y ${selectedTank.TOTAL_GALS.toFixed(2)}`);
+          setError(`${t.invalidGallons} ${selectedTank.TOTAL_GALS.toFixed(2)}`);
           return;
         }
         const calculationResult = calculate(selectedTank, gallonsValue);
@@ -244,31 +255,46 @@ export default function CalculatorScreen() {
 
   return (
     <KeyboardAvoidingView 
-      style={[styles.container, { backgroundColor }]} 
+      style={styles.container} 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <StatusBar style="light" />
-      <FloatingMenu
-        history={searchHistory}
-        onClearHistory={clearHistory}
-        onSelectHistoryItem={handleSelectHistoryItem}
-        backgroundColor={backgroundColor}
-        onChangeBackgroundColor={handleChangeBackgroundColor}
-        language={language}
-        onChangeLanguage={handleChangeLanguage}
-      />
       
+      {/* Header con menú hamburguesa integrado */}
       <View style={styles.header}>
+        <TouchableOpacity 
+          style={styles.menuButton} 
+          onPress={() => setMenuOpen(true)}
+        >
+          <Text style={styles.menuButtonText}>☰</Text>
+        </TouchableOpacity>
         <Image 
           source={require('../../assets/caymus-logo.jpeg')} 
           style={styles.logo}
           resizeMode="contain"
         />
+        <View style={styles.headerSpacer} />
       </View>
+
+      {/* Floating Menu (ahora es un sidebar) */}
+      <FloatingMenu
+        isVisible={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        history={searchHistory}
+        onClearHistory={clearHistory}
+        onSelectHistoryItem={(tankId) => {
+          handleSelectHistoryItem(tankId);
+          setMenuOpen(false);
+        }}
+        language={language}
+        onChangeLanguage={handleChangeLanguage}
+        isAuthenticated={isAuthenticated}
+        onLogout={handleLogout}
+      />
 
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Selección de Tanque</Text>
+          <Text style={styles.sectionTitle}>{t.tankSelection}</Text>
           
           <View style={styles.searchRow}>
             <TextInput
@@ -286,7 +312,7 @@ export default function CalculatorScreen() {
               data-testid="button-toggle-tank-list"
             >
               <Text style={styles.tankListButtonText}>
-                {showTankList ? '▲ Tanques' : '▼ Tanques'}
+                {showTankList ? `▲ ${t.tanks}` : `▼ ${t.tanks}`}
               </Text>
             </TouchableOpacity>
           </View>
@@ -297,7 +323,7 @@ export default function CalculatorScreen() {
                 style={styles.tankSearchInput}
                 value={tankSearch}
                 onChangeText={setTankSearch}
-                placeholder="🔍 Buscar tanque..."
+                placeholder={t.searchTank}
                 placeholderTextColor="#666"
                 autoCapitalize="characters"
               />
@@ -321,73 +347,53 @@ export default function CalculatorScreen() {
                     <Text style={[
                       styles.tankGridText,
                       selectedTankId === tankId && styles.tankGridTextSelected
-                    ]}>
-                      {tankId}
-                    </Text>
+                    ]}>{tankId}</Text>
                   </TouchableOpacity>
-                ))}
-              </View>
+                  ))}
+                </View>
               </ScrollView>
             </View>
           )}
 
-          {selectedTankId && !selectedTank && (
-            <Text style={styles.errorText}>No se encontró "{selectedTankId}"</Text>
-          )}
-
           {selectedTank && (
             <View style={styles.specsContainer}>
-              <Text style={styles.specsTitle}>Especificaciones</Text>
+              <Text style={styles.specsTitle}>{t.tankSpecs}: {selectedTankId}</Text>
               <View style={styles.specRow}>
-                <Text style={styles.specLabel}>Galones/Pulgada:</Text>
-                <Text style={styles.specValue}>{selectedTank.GALS_PER_INCH.toFixed(2)}</Text>
+                <Text style={styles.specLabel}>{t.totalCapacity}:</Text>
+                <Text style={styles.specValue}>{formatNumber(selectedTank.TOTAL_GALS)} gal</Text>
               </View>
               <View style={styles.specRow}>
-                <Text style={styles.specLabel}>Galones en Tope:</Text>
-                <Text style={styles.specValue}>{selectedTank.GALS_IN_TOP.toFixed(2)}</Text>
+                <Text style={styles.specLabel}>{t.gallonsPerInch}:</Text>
+                <Text style={styles.specValue}>{formatNumber(selectedTank.GALS_PER_INCH)} gal/in</Text>
               </View>
               <View style={styles.specRow}>
-                <Text style={styles.specLabel}>Pulgadas en Tope:</Text>
-                <Text style={styles.specValue}>{selectedTank.TOP_INCHES.toFixed(2)}</Text>
+                <Text style={styles.specLabel}>{t.bellCapacity}:</Text>
+                <Text style={styles.specValue}>{formatNumber(selectedTank.GALS_IN_TOP)} gal</Text>
               </View>
               <View style={styles.specRow}>
-                <Text style={styles.specLabel}>Galones Totales:</Text>
-                <Text style={styles.specValue}>{selectedTank.TOTAL_GALS.toFixed(2)}</Text>
+                <Text style={styles.specLabel}>{t.bellHeight}:</Text>
+                <Text style={styles.specValue}>{formatNumber(selectedTank.TOP_INCHES)} in</Text>
               </View>
             </View>
           )}
 
           <View style={styles.toggleContainer}>
-            <Text style={styles.toggleLabel}>Modo de Cálculo</Text>
+            <Text style={styles.toggleLabel}>{t.calculationMode}</Text>
             <View style={styles.toggleSwitch}>
               <TouchableOpacity
-                style={[
-                  styles.toggleOption,
-                  mode === 'spaceToGallons' && styles.toggleOptionActive
-                ]}
-                onPress={() => { setMode('spaceToGallons'); setResult(null); setError(null); }}
-                data-testid="button-mode-space-to-gallons"
+                style={[styles.toggleOption, mode === 'spaceToGallons' && styles.toggleOptionActive]}
+                onPress={() => { setMode('spaceToGallons'); setResult(null); }}
               >
-                <Text style={[
-                  styles.toggleText,
-                  mode === 'spaceToGallons' && styles.toggleTextActive
-                ]}>
-                  Espacio → Galones
+                <Text style={[styles.toggleText, mode === 'spaceToGallons' && styles.toggleTextActive]}>
+                  {t.spaceToGallons}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[
-                  styles.toggleOption,
-                  mode === 'gallonsToSpace' && styles.toggleOptionActive
-                ]}
-                onPress={() => { setMode('gallonsToSpace'); setResult(null); setError(null); }}
-                data-testid="button-mode-gallons-to-space"
+                style={[styles.toggleOption, mode === 'gallonsToSpace' && styles.toggleOptionActive]}
+                onPress={() => { setMode('gallonsToSpace'); setResult(null); }}
               >
-                <Text style={[
-                  styles.toggleText,
-                  mode === 'gallonsToSpace' && styles.toggleTextActive
-                ]}>
-                  Galones → Espacio
+                <Text style={[styles.toggleText, mode === 'gallonsToSpace' && styles.toggleTextActive]}>
+                  {t.gallonsToSpace}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -395,35 +401,35 @@ export default function CalculatorScreen() {
 
           {mode === 'spaceToGallons' ? (
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Pulgadas de Espacio</Text>
+              <Text style={styles.label}>{t.inchesOfSpace}</Text>
               <View style={styles.inputWithUnit}>
                 <TextInput
                   style={styles.inputField}
                   value={inchesSpace}
                   onChangeText={setInchesSpace}
-                  keyboardType="decimal-pad"
                   placeholder="0.00"
                   placeholderTextColor="#666"
+                  keyboardType="decimal-pad"
                 />
                 <Text style={styles.unit}>in</Text>
               </View>
-              <Text style={styles.hint}>Ingrese la medida de espacio vacío desde la parte superior del tanque</Text>
+              <Text style={styles.hint}>{t.enterSpaceHint}</Text>
             </View>
           ) : (
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Galones Deseados</Text>
+              <Text style={styles.label}>{t.desiredGallons}</Text>
               <View style={styles.inputWithUnit}>
                 <TextInput
                   style={styles.inputField}
                   value={desiredGallons}
                   onChangeText={setDesiredGallons}
-                  keyboardType="decimal-pad"
                   placeholder="0.00"
                   placeholderTextColor="#666"
+                  keyboardType="decimal-pad"
                 />
                 <Text style={styles.unit}>gal</Text>
               </View>
-              <Text style={styles.hint}>Ingrese el volumen deseado en galones</Text>
+              <Text style={styles.hint}>{t.enterGallonsHint}</Text>
             </View>
           )}
 
@@ -435,56 +441,73 @@ export default function CalculatorScreen() {
 
           <View style={styles.buttonContainer}>
             <TouchableOpacity style={styles.calculateButton} onPress={handleCalculate}>
-              <Text style={styles.calculateButtonText}>CALCULAR</Text>
+              <Text style={styles.calculateButtonText}>{t.calculate}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.resetButton} onPress={handleReset}>
-              <Text style={styles.resetButtonText}>RESETEAR</Text>
+              <Text style={styles.resetButtonText}>{t.reset}</Text>
             </TouchableOpacity>
           </View>
 
-          {result && selectedTank && (
+          {result && (
             <View style={styles.resultsContainer}>
-              <Text style={styles.resultsTitle}>Resultado</Text>
-              
-              {/* Mensaje de precisión dinámico */}
-              {result && 'precisionMessage' in result && (
-                <View style={[styles.warningContainer, result.isInCampana ? styles.campanaWarning : styles.bodySuccess]}>
-                  <Text style={[styles.warningText, !result.isInCampana && styles.successText]}>
-                    {result.precisionMessage}
-                  </Text>
-                </View>
-              )}
-              
-              <TankVisual fillPercentage={fillPercentage} />
+              <Text style={styles.resultsTitle}>{t.results}</Text>
               
               {isSpaceToGallons(result) && (
-                <View style={styles.resultValues}>
-                  <View style={styles.resultRow}>
-                    <Text style={styles.resultLabel}>Total de galones en el tanque:</Text>
-                    <Text style={styles.resultValue}>{formatNumber(result.totalGallons)}</Text>
+                <>
+                  {result.isInCampana ? (
+                    <View style={[styles.warningContainer, styles.campanaWarning]}>
+                      <Text style={styles.warningText}>{t.bellZoneWarning}</Text>
+                    </View>
+                  ) : (
+                    <View style={[styles.warningContainer, styles.bodySuccess]}>
+                      <Text style={[styles.warningText, styles.successText]}>{t.bodyZoneSuccess}</Text>
+                    </View>
+                  )}
+                  
+                  <View style={styles.resultValues}>
+                    <View style={styles.resultRow}>
+                      <Text style={styles.resultLabel}>{t.wineGallons}:</Text>
+                      <Text style={styles.resultValue}>{formatNumber(result.totalGallons)} gal</Text>
+                    </View>
+                    <View style={styles.resultRow}>
+                      <Text style={styles.resultLabel}>{t.emptySpace}:</Text>
+                      <Text style={styles.resultValue}>{formatNumber(result.remainingGallons)} gal</Text>
+                    </View>
+                    <View style={styles.resultRow}>
+                      <Text style={styles.resultLabel}>{t.fillPercentage}:</Text>
+                      <Text style={styles.resultValue}>{result.fillPercentage.toFixed(1)}%</Text>
+                    </View>
                   </View>
-                  <View style={styles.resultRow}>
-                    <Text style={styles.resultLabel}>Galones restantes:</Text>
-                    <Text style={styles.resultValue}>{formatNumber(result.remainingGallons)}</Text>
-                  </View>
-                  <View style={styles.resultRow}>
-                    <Text style={styles.resultLabel}>Porcentaje de llenado:</Text>
-                    <Text style={styles.resultValue}>{fillPercentage.toFixed(1)}%</Text>
-                  </View>
-                </View>
+                </>
               )}
               
               {isGallonsToSpace(result) && (
-                <View style={styles.resultValues}>
-                  <View style={styles.resultRow}>
-                    <Text style={styles.resultLabel}>Espacio requerido (pulgadas):</Text>
-                    <Text style={styles.resultValue}>{formatNumber(result.requiredSpace)}</Text>
+                <>
+                  {result.isInCampana ? (
+                    <View style={[styles.warningContainer, styles.campanaWarning]}>
+                      <Text style={styles.warningText}>{t.bellZoneWarning}</Text>
+                    </View>
+                  ) : (
+                    <View style={[styles.warningContainer, styles.bodySuccess]}>
+                      <Text style={[styles.warningText, styles.successText]}>{t.bodyZoneSuccess}</Text>
+                    </View>
+                  )}
+                  
+                  <View style={styles.resultValues}>
+                    <View style={styles.resultRow}>
+                      <Text style={styles.resultLabel}>{t.requiredSpace}:</Text>
+                      <Text style={styles.resultValue}>{formatNumber(result.requiredSpace)} in</Text>
+                    </View>
+                    <View style={styles.resultRow}>
+                      <Text style={styles.resultLabel}>{t.wineGallons}:</Text>
+                      <Text style={styles.resultValue}>{formatNumber(parseFloat(desiredGallons) || 0)} gal</Text>
+                    </View>
+                    <View style={styles.resultRow}>
+                      <Text style={styles.resultLabel}>{t.fillPercentage}:</Text>
+                      <Text style={styles.resultValue}>{result.fillPercentage.toFixed(1)}%</Text>
+                    </View>
                   </View>
-                  <View style={styles.resultRow}>
-                    <Text style={styles.resultLabel}>Porcentaje de llenado:</Text>
-                    <Text style={styles.resultValue}>{fillPercentage.toFixed(1)}%</Text>
-                  </View>
-                </View>
+                </>
               )}
             </View>
           )}
@@ -492,8 +515,8 @@ export default function CalculatorScreen() {
       </ScrollView>
 
       <View style={styles.footer}>
-        <Text style={styles.footerText}>© {new Date().getFullYear()} Chyrris Technologies</Text>
-        <Text style={styles.footerSubtext}>All rights reserved</Text>
+        <Text style={styles.footerText}>© 2026 Chyrris Technologies</Text>
+        <Text style={styles.footerSubtext}>{t.allRightsReserved}</Text>
       </View>
     </KeyboardAvoidingView>
   );
@@ -502,7 +525,7 @@ export default function CalculatorScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0a1628', // Default, overridden by state
+    backgroundColor: '#0a1628',
   },
   scrollView: {
     flex: 1,
@@ -511,18 +534,46 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     width: '100%',
     backgroundColor: '#112240',
     paddingVertical: 8,
     paddingHorizontal: 12,
+    paddingTop: Platform.OS === 'ios' ? 50 : 8,
     borderBottomWidth: 2,
     borderBottomColor: '#00d4ff',
+  },
+  menuButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 8,
+    backgroundColor: '#00d4ff',
+    justifyContent: 'center',
     alignItems: 'center',
   },
+  menuButtonText: {
+    fontSize: 20,
+    color: '#000',
+    fontWeight: 'bold',
+  },
   logo: {
-    width: '60%',
-    height: 60,
-    maxWidth: 280,
+    width: '50%',
+    height: 50,
+    maxWidth: 200,
+  },
+  headerSpacer: {
+    width: 40,
+  },
+  menuOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    zIndex: 999,
   },
   card: {
     margin: 16,

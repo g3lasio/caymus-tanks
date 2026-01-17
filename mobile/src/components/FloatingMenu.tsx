@@ -8,23 +8,24 @@ import {
   StyleSheet,
   TextInput,
   Linking,
-  Animated,
-  Dimensions,
+  Switch,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { TRANSLATIONS, LEGAL_CONTENT, Language } from '../i18n/translations';
 
 // ============================================================================
 // TIPOS E INTERFACES
 // ============================================================================
 
 interface FloatingMenuProps {
+  isVisible: boolean;
+  onClose: () => void;
   history: HistoryItem[];
   onClearHistory: () => void;
   onSelectHistoryItem: (tankId: string) => void;
-  backgroundColor: string;
-  onChangeBackgroundColor: (color: string) => void;
-  language: 'es' | 'en';
-  onChangeLanguage: (lang: 'es' | 'en') => void;
+  language: Language;
+  onChangeLanguage: (lang: Language) => void;
+  isAuthenticated?: boolean;
+  onLogout?: () => void;
 }
 
 interface HistoryItem {
@@ -33,268 +34,23 @@ interface HistoryItem {
   timestamp: number;
 }
 
-type PageType = 'menu' | 'nda' | 'privacy' | 'legal' | 'history' | 'settings' | 'help' | null;
-
-// ============================================================================
-// CONTENIDO LEGAL EN ESPAÑOL
-// ============================================================================
-
-const LEGAL_CONTENT = {
-  nda: {
-    title: 'Acuerdo de Confidencialidad',
-    content: `ACUERDO DE CONFIDENCIALIDAD Y NO DIVULGACIÓN
-
-Fecha de entrada en vigor: Enero 2026
-
-PARTES:
-- Chyrris Technologies Inc. ("La Empresa")
-- El Usuario de la Aplicación ("El Usuario")
-
-1. PROPÓSITO
-Este Acuerdo de Confidencialidad establece los términos bajo los cuales el Usuario acepta mantener la confidencialidad de la información propietaria contenida en la aplicación Caymus Tank Calculator.
-
-2. INFORMACIÓN CONFIDENCIAL
-Se considera información confidencial:
-• Todos los datos de especificaciones de tanques (capacidades, dimensiones, fórmulas)
-• Los algoritmos de cálculo utilizados en la aplicación
-• Cualquier información técnica relacionada con los tanques de vino
-• Los métodos de calibración y medición
-
-3. OBLIGACIONES DEL USUARIO
-El Usuario se compromete a:
-• NO divulgar la información confidencial a terceros
-• NO copiar, reproducir o distribuir los datos de tanques
-• NO utilizar la información para fines distintos a su trabajo autorizado
-• Proteger la información con el mismo cuidado que protegería su propia información confidencial
-
-4. PROPIEDAD
-• La aplicación Caymus Tank Calculator es propiedad exclusiva de Chyrris Technologies Inc.
-• Esta aplicación NO tiene afiliación con Caymus Vineyards ni con Wagner Family of Wine
-• Los datos de tanques son información propietaria de Chyrris Technologies Inc.
-
-5. RESTRICCIÓN DE DISPOSITIVO
-El Usuario acepta que su cuenta está vinculada a un único dispositivo. El uso compartido de cuentas está estrictamente prohibido.
-
-6. DURACIÓN
-Este acuerdo permanece vigente mientras el Usuario tenga acceso a la aplicación y por un período de 5 años después de la terminación del acceso.
-
-7. CONSECUENCIAS DEL INCUMPLIMIENTO
-El incumplimiento de este acuerdo puede resultar en:
-• Terminación inmediata del acceso a la aplicación
-• Acciones legales por daños y perjuicios
-• Responsabilidad por pérdidas comerciales
-
-Al usar esta aplicación, el Usuario confirma que ha leído, entendido y acepta los términos de este Acuerdo de Confidencialidad.
-
-© 2026 Chyrris Technologies Inc. Todos los derechos reservados.`
-  },
-  privacy: {
-    title: 'Política de Privacidad',
-    content: `POLÍTICA DE PRIVACIDAD
-
-Última actualización: Enero 2026
-
-Chyrris Technologies Inc. ("nosotros", "nuestro" o "la Empresa") opera la aplicación Caymus Tank Calculator. Esta página le informa sobre nuestras políticas con respecto a la recopilación, uso y divulgación de información personal.
-
-1. INFORMACIÓN QUE RECOPILAMOS
-
-1.1 Información de Cuenta:
-• Número de teléfono (para autenticación OTP)
-• Identificador único de dispositivo
-
-1.2 Datos de Uso:
-• Historial de cálculos realizados
-• Preferencias de la aplicación
-• Registros de acceso
-
-2. USO DE LA INFORMACIÓN
-
-Utilizamos la información recopilada para:
-• Proporcionar y mantener el servicio
-• Autenticar usuarios y prevenir acceso no autorizado
-• Mejorar la experiencia del usuario
-• Cumplir con obligaciones legales
-
-3. ALMACENAMIENTO DE DATOS
-
-• Los datos se almacenan de forma segura en servidores protegidos
-• Implementamos medidas de seguridad estándar de la industria
-• Los datos de cálculos se almacenan localmente en su dispositivo
-
-4. COMPARTIR INFORMACIÓN
-
-NO vendemos, comercializamos ni transferimos su información personal a terceros, excepto:
-• Cuando sea requerido por ley
-• Para proteger nuestros derechos legales
-• Con su consentimiento explícito
-
-5. SUS DERECHOS
-
-Usted tiene derecho a:
-• Acceder a sus datos personales
-• Solicitar la corrección de datos inexactos
-• Solicitar la eliminación de sus datos
-• Retirar su consentimiento en cualquier momento
-
-6. ELIMINACIÓN DE DATOS
-
-Para solicitar la eliminación de sus datos, contacte a:
-support@chyrris.com
-
-7. CAMBIOS A ESTA POLÍTICA
-
-Nos reservamos el derecho de actualizar esta política. Los cambios serán notificados a través de la aplicación.
-
-8. CONTACTO
-
-Para preguntas sobre esta política:
-Email: info@chyrris.com
-Web: https://chyrris.com
-
-© 2026 Chyrris Technologies Inc.`
-  },
-  legal: {
-    title: 'Términos y Condiciones',
-    content: `TÉRMINOS Y CONDICIONES DE USO
-
-Última actualización: Enero 2026
-
-Por favor lea estos términos cuidadosamente antes de usar la aplicación Caymus Tank Calculator.
-
-1. ACEPTACIÓN DE TÉRMINOS
-
-Al acceder y usar esta aplicación, usted acepta estar sujeto a estos Términos y Condiciones. Si no está de acuerdo, no use la aplicación.
-
-2. DESCRIPCIÓN DEL SERVICIO
-
-Caymus Tank Calculator es una herramienta de cálculo para tanques de vino que permite:
-• Calcular volúmenes basados en mediciones de espacio
-• Convertir entre galones y pulgadas de espacio
-• Mantener un historial de cálculos
-
-3. LICENCIA DE USO
-
-Se le otorga una licencia limitada, no exclusiva y no transferible para usar la aplicación únicamente para fines laborales autorizados.
-
-4. RESTRICCIONES
-
-Usted NO puede:
-• Copiar, modificar o distribuir la aplicación
-• Realizar ingeniería inversa del software
-• Usar la aplicación para fines ilegales
-• Compartir su cuenta con terceros
-• Extraer o copiar los datos de tanques
-
-5. PROPIEDAD INTELECTUAL
-
-• Todos los derechos de propiedad intelectual pertenecen a Chyrris Technologies Inc.
-• Las marcas, logos y nombres comerciales son propiedad de sus respectivos dueños
-• Esta aplicación NO está afiliada con Caymus Vineyards
-
-6. PRECISIÓN DE CÁLCULOS
-
-• Los cálculos se proporcionan "tal cual"
-• La precisión en la zona de campana es aproximadamente 97.99%
-• La precisión en el cuerpo cilíndrico es aproximadamente 99.9%
-• El usuario es responsable de verificar los resultados críticos
-
-7. LIMITACIÓN DE RESPONSABILIDAD
-
-Chyrris Technologies Inc. no será responsable por:
-• Pérdidas derivadas del uso de la aplicación
-• Errores en los cálculos debido a datos de entrada incorrectos
-• Interrupciones del servicio
-
-8. TERMINACIÓN
-
-Podemos terminar su acceso en cualquier momento si:
-• Viola estos términos
-• Incumple el acuerdo de confidencialidad
-• Usa la aplicación de manera indebida
-
-9. LEY APLICABLE
-
-Estos términos se rigen por las leyes del Estado de California, Estados Unidos.
-
-10. CONTACTO
-
-Para consultas legales:
-Email: legal@chyrris.com
-Web: https://chyrris.com
-
-© 2026 Chyrris Technologies Inc. Todos los derechos reservados.`
-  }
-};
-
-const TRANSLATIONS = {
-  es: {
-    menu: 'Menú',
-    nda: 'Acuerdo de Confidencialidad',
-    privacy: 'Política de Privacidad',
-    legal: 'Términos y Condiciones',
-    history: 'Historial de Cálculos',
-    settings: 'Configuración',
-    help: 'Ayuda y Soporte',
-    close: 'Cerrar',
-    clearHistory: 'Limpiar Historial',
-    noHistory: 'No hay historial de cálculos',
-    language: 'Idioma',
-    backgroundColor: 'Color de Fondo',
-    spanish: 'Español',
-    english: 'English',
-    sendFeedback: 'Enviar Feedback',
-    feedbackPlaceholder: 'Escribe tu mensaje, pregunta o sugerencia...',
-    send: 'Enviar',
-    feedbackSent: '¡Mensaje enviado! Te contactaremos pronto.',
-    yourEmail: 'Tu email (opcional)',
-    subject: 'Asunto',
-  },
-  en: {
-    menu: 'Menu',
-    nda: 'Confidentiality Agreement',
-    privacy: 'Privacy Policy',
-    legal: 'Terms and Conditions',
-    history: 'Calculation History',
-    settings: 'Settings',
-    help: 'Help & Support',
-    close: 'Close',
-    clearHistory: 'Clear History',
-    noHistory: 'No calculation history',
-    language: 'Language',
-    backgroundColor: 'Background Color',
-    spanish: 'Español',
-    english: 'English',
-    sendFeedback: 'Send Feedback',
-    feedbackPlaceholder: 'Write your message, question or suggestion...',
-    send: 'Send',
-    feedbackSent: 'Message sent! We will contact you soon.',
-    yourEmail: 'Your email (optional)',
-    subject: 'Subject',
-  }
-};
-
-const BACKGROUND_COLORS = [
-  { name: 'Azul Oscuro', value: '#0a1628' },
-  { name: 'Negro', value: '#000000' },
-  { name: 'Azul Marino', value: '#0d1b2a' },
-  { name: 'Gris Oscuro', value: '#1a1a2e' },
-  { name: 'Verde Oscuro', value: '#0d1f0d' },
-];
+type PageType = 'nda' | 'privacy' | 'legal' | 'history' | 'help' | null;
 
 // ============================================================================
 // COMPONENTE PRINCIPAL
 // ============================================================================
 
 export default function FloatingMenu({
+  isVisible,
+  onClose,
   history,
   onClearHistory,
   onSelectHistoryItem,
-  backgroundColor,
-  onChangeBackgroundColor,
   language,
   onChangeLanguage,
+  isAuthenticated = false,
+  onLogout,
 }: FloatingMenuProps) {
-  const [isOpen, setIsOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState<PageType>(null);
   const [feedbackText, setFeedbackText] = useState('');
   const [feedbackEmail, setFeedbackEmail] = useState('');
@@ -302,10 +58,11 @@ export default function FloatingMenu({
   const [feedbackSent, setFeedbackSent] = useState(false);
 
   const t = TRANSLATIONS[language];
+  const legalContent = LEGAL_CONTENT[language];
 
   const openPage = (page: PageType) => {
     setCurrentPage(page);
-    setIsOpen(false);
+    onClose();
   };
 
   const closePage = () => {
@@ -319,7 +76,7 @@ export default function FloatingMenu({
   const handleSendFeedback = () => {
     const subject = encodeURIComponent(feedbackSubject || 'Feedback - Caymus Calculator');
     const body = encodeURIComponent(
-      `${feedbackText}\n\n---\nEmail de contacto: ${feedbackEmail || 'No proporcionado'}`
+      `${feedbackText}\n\n---\nEmail: ${feedbackEmail || 'Not provided'}`
     );
     Linking.openURL(`mailto:info@chyrris.com?subject=${subject}&body=${body}`);
     setFeedbackSent(true);
@@ -335,18 +92,29 @@ export default function FloatingMenu({
     });
   };
 
+  const handleLanguageToggle = () => {
+    onChangeLanguage(language === 'es' ? 'en' : 'es');
+  };
+
+  const handleLogout = () => {
+    onClose();
+    if (onLogout) {
+      onLogout();
+    }
+  };
+
   // Renderizar página de contenido legal
   const renderLegalPage = (type: 'nda' | 'privacy' | 'legal') => (
     <Modal visible={true} animationType="slide" transparent={false}>
       <View style={styles.pageContainer}>
         <View style={styles.pageHeader}>
-          <Text style={styles.pageTitle}>{LEGAL_CONTENT[type].title}</Text>
+          <Text style={styles.pageTitle}>{legalContent[type].title}</Text>
           <TouchableOpacity onPress={closePage} style={styles.closeButton}>
             <Text style={styles.closeButtonText}>✕</Text>
           </TouchableOpacity>
         </View>
         <ScrollView style={styles.pageContent}>
-          <Text style={styles.legalText}>{LEGAL_CONTENT[type].content}</Text>
+          <Text style={styles.legalText}>{legalContent[type].content}</Text>
         </ScrollView>
       </View>
     </Modal>
@@ -388,66 +156,6 @@ export default function FloatingMenu({
               </TouchableOpacity>
             </>
           )}
-        </ScrollView>
-      </View>
-    </Modal>
-  );
-
-  // Renderizar página de configuración
-  const renderSettingsPage = () => (
-    <Modal visible={true} animationType="slide" transparent={false}>
-      <View style={styles.pageContainer}>
-        <View style={styles.pageHeader}>
-          <Text style={styles.pageTitle}>{t.settings}</Text>
-          <TouchableOpacity onPress={closePage} style={styles.closeButton}>
-            <Text style={styles.closeButtonText}>✕</Text>
-          </TouchableOpacity>
-        </View>
-        <ScrollView style={styles.pageContent}>
-          {/* Idioma */}
-          <View style={styles.settingSection}>
-            <Text style={styles.settingLabel}>{t.language}</Text>
-            <View style={styles.settingOptions}>
-              <TouchableOpacity
-                style={[styles.settingOption, language === 'es' && styles.settingOptionActive]}
-                onPress={() => onChangeLanguage('es')}
-              >
-                <Text style={[styles.settingOptionText, language === 'es' && styles.settingOptionTextActive]}>
-                  🇪🇸 {t.spanish}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.settingOption, language === 'en' && styles.settingOptionActive]}
-                onPress={() => onChangeLanguage('en')}
-              >
-                <Text style={[styles.settingOptionText, language === 'en' && styles.settingOptionTextActive]}>
-                  🇺🇸 {t.english}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          {/* Color de fondo */}
-          <View style={styles.settingSection}>
-            <Text style={styles.settingLabel}>{t.backgroundColor}</Text>
-            <View style={styles.colorOptions}>
-              {BACKGROUND_COLORS.map((color) => (
-                <TouchableOpacity
-                  key={color.value}
-                  style={[
-                    styles.colorOption,
-                    { backgroundColor: color.value },
-                    backgroundColor === color.value && styles.colorOptionActive
-                  ]}
-                  onPress={() => onChangeBackgroundColor(color.value)}
-                >
-                  {backgroundColor === color.value && (
-                    <Text style={styles.colorCheckmark}>✓</Text>
-                  )}
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
         </ScrollView>
       </View>
     </Modal>
@@ -513,32 +221,19 @@ export default function FloatingMenu({
 
   return (
     <>
-      {/* Botón flotante */}
-      <TouchableOpacity
-        style={styles.floatingButton}
-        onPress={() => setIsOpen(true)}
-      >
-        <Text style={styles.floatingButtonText}>☰</Text>
-      </TouchableOpacity>
-
-      {/* Modal del menú */}
-      <Modal visible={isOpen} animationType="fade" transparent={true}>
+      {/* Modal del menú (sidebar) */}
+      <Modal visible={isVisible} animationType="fade" transparent={true}>
         <TouchableOpacity
           style={styles.menuOverlay}
           activeOpacity={1}
-          onPress={() => setIsOpen(false)}
+          onPress={onClose}
         >
-          <View style={styles.menuContainer}>
+          <View style={styles.sidebarContainer} onStartShouldSetResponder={() => true}>
             <Text style={styles.menuTitle}>{t.menu}</Text>
             
             <TouchableOpacity style={styles.menuItem} onPress={() => openPage('history')}>
               <Text style={styles.menuItemIcon}>📋</Text>
               <Text style={styles.menuItemText}>{t.history}</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.menuItem} onPress={() => openPage('settings')}>
-              <Text style={styles.menuItemIcon}>⚙️</Text>
-              <Text style={styles.menuItemText}>{t.settings}</Text>
             </TouchableOpacity>
 
             <View style={styles.menuDivider} />
@@ -565,7 +260,32 @@ export default function FloatingMenu({
               <Text style={styles.menuItemText}>{t.help}</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.menuCloseButton} onPress={() => setIsOpen(false)}>
+            {/* Spacer para empujar elementos al fondo */}
+            <View style={styles.spacer} />
+
+            {/* Toggle de idioma al final */}
+            <View style={styles.languageToggleContainer}>
+              <Text style={styles.languageLabel}>ES</Text>
+              <Switch
+                value={language === 'en'}
+                onValueChange={handleLanguageToggle}
+                trackColor={{ false: '#00d4ff', true: '#00d4ff' }}
+                thumbColor={language === 'en' ? '#fff' : '#fff'}
+                ios_backgroundColor="#1e3a5f"
+                style={styles.languageSwitch}
+              />
+              <Text style={styles.languageLabel}>EN</Text>
+            </View>
+
+            {/* Botón de Logout (solo si está autenticado) */}
+            {isAuthenticated && (
+              <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+                <Text style={styles.logoutIcon}>🚪</Text>
+                <Text style={styles.logoutText}>{t.logout}</Text>
+              </TouchableOpacity>
+            )}
+
+            <TouchableOpacity style={styles.menuCloseButton} onPress={onClose}>
               <Text style={styles.menuCloseButtonText}>{t.close}</Text>
             </TouchableOpacity>
           </View>
@@ -577,35 +297,35 @@ export default function FloatingMenu({
       {currentPage === 'privacy' && renderLegalPage('privacy')}
       {currentPage === 'legal' && renderLegalPage('legal')}
       {currentPage === 'history' && renderHistoryPage()}
-      {currentPage === 'settings' && renderSettingsPage()}
       {currentPage === 'help' && renderHelpPage()}
     </>
   );
 }
+
+// Exportar función para abrir el menú desde el header
+export const MenuButton = ({ onPress }: { onPress: () => void }) => (
+  <TouchableOpacity style={styles.menuButton} onPress={onPress}>
+    <Text style={styles.menuButtonText}>☰</Text>
+  </TouchableOpacity>
+);
+
+// Exportar ref para controlar el menú desde fuera
+export { FloatingMenu };
 
 // ============================================================================
 // ESTILOS
 // ============================================================================
 
 const styles = StyleSheet.create({
-  floatingButton: {
-    position: 'absolute',
-    top: 50,
-    left: 16,
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+  menuButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 8,
     backgroundColor: '#00d4ff',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#00d4ff',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.5,
-    shadowRadius: 4,
-    elevation: 5,
-    zIndex: 1000,
   },
-  floatingButtonText: {
+  menuButtonText: {
     fontSize: 20,
     color: '#000',
     fontWeight: 'bold',
@@ -613,24 +333,25 @@ const styles = StyleSheet.create({
   menuOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    flexDirection: 'row',
   },
-  menuContainer: {
-    width: '85%',
-    maxWidth: 320,
+  sidebarContainer: {
+    width: '80%',
+    maxWidth: 300,
+    height: '100%',
     backgroundColor: '#112240',
-    borderRadius: 16,
-    padding: 20,
-    borderWidth: 2,
-    borderColor: '#00d4ff',
+    paddingTop: 50,
+    paddingHorizontal: 20,
+    paddingBottom: 30,
+    borderRightWidth: 2,
+    borderRightColor: '#00d4ff',
   },
   menuTitle: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#00d4ff',
+    marginBottom: 30,
     textAlign: 'center',
-    marginBottom: 20,
   },
   menuItem: {
     flexDirection: 'row',
@@ -653,8 +374,50 @@ const styles = StyleSheet.create({
     backgroundColor: '#1e3a5f',
     marginVertical: 10,
   },
+  spacer: {
+    flex: 1,
+  },
+  languageToggleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    marginBottom: 10,
+    backgroundColor: '#0d1f3c',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#1e3a5f',
+  },
+  languageLabel: {
+    color: '#00d4ff',
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginHorizontal: 10,
+  },
+  languageSwitch: {
+    transform: [{ scaleX: 0.9 }, { scaleY: 0.9 }],
+  },
+  logoutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    marginBottom: 10,
+    backgroundColor: '#331111',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#ff4444',
+  },
+  logoutIcon: {
+    fontSize: 18,
+    marginRight: 8,
+  },
+  logoutText: {
+    color: '#ff4444',
+    fontSize: 16,
+    fontWeight: '600',
+  },
   menuCloseButton: {
-    marginTop: 16,
     paddingVertical: 12,
     backgroundColor: '#0d1f3c',
     borderRadius: 8,
@@ -757,64 +520,6 @@ const styles = StyleSheet.create({
     color: '#ff4444',
     fontSize: 16,
     fontWeight: '600',
-  },
-  settingSection: {
-    marginBottom: 30,
-  },
-  settingLabel: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#00d4ff',
-    marginBottom: 12,
-  },
-  settingOptions: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  settingOption: {
-    flex: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    backgroundColor: '#112240',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#1e3a5f',
-    alignItems: 'center',
-  },
-  settingOptionActive: {
-    borderColor: '#00d4ff',
-    backgroundColor: '#0d2847',
-  },
-  settingOptionText: {
-    color: '#8892b0',
-    fontSize: 14,
-  },
-  settingOptionTextActive: {
-    color: '#00d4ff',
-    fontWeight: '600',
-  },
-  colorOptions: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-  },
-  colorOption: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    borderWidth: 2,
-    borderColor: '#1e3a5f',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  colorOptionActive: {
-    borderColor: '#00d4ff',
-    borderWidth: 3,
-  },
-  colorCheckmark: {
-    color: '#00d4ff',
-    fontSize: 20,
-    fontWeight: 'bold',
   },
   feedbackInput: {
     backgroundColor: '#112240',
