@@ -15,6 +15,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import tankData, { TankData } from '../data/tankData';
 import { useTankCalculator } from '../hooks/useTankCalculator';
 import TankVisual from '../components/TankVisual';
+import FloatingMenu from '../components/FloatingMenu';
 
 interface HistoryItem {
   tankId: string;
@@ -33,6 +34,8 @@ export default function CalculatorScreen() {
   const [showHistory, setShowHistory] = useState<boolean>(false);
   const [showTankList, setShowTankList] = useState<boolean>(false);
   const [tankSearch, setTankSearch] = useState<string>('');
+  const [backgroundColor, setBackgroundColor] = useState<string>('#0a1628');
+  const [language, setLanguage] = useState<'es' | 'en'>('es');
 
   const { 
     mode, 
@@ -70,6 +73,52 @@ export default function CalculatorScreen() {
       console.error('Error saving history', e);
     }
   };
+
+  const clearHistory = async () => {
+    setSearchHistory([]);
+    try {
+      await AsyncStorage.removeItem('tankSearchHistory');
+    } catch (e) {
+      console.error('Error clearing history', e);
+    }
+  };
+
+  const handleSelectHistoryItem = (tankId: string) => {
+    handleSelectTank(tankId);
+  };
+
+  const handleChangeBackgroundColor = async (color: string) => {
+    setBackgroundColor(color);
+    try {
+      await AsyncStorage.setItem('backgroundColor', color);
+    } catch (e) {
+      console.error('Error saving background color', e);
+    }
+  };
+
+  const handleChangeLanguage = async (lang: 'es' | 'en') => {
+    setLanguage(lang);
+    try {
+      await AsyncStorage.setItem('language', lang);
+    } catch (e) {
+      console.error('Error saving language', e);
+    }
+  };
+
+  // Cargar preferencias guardadas
+  useEffect(() => {
+    const loadPreferences = async () => {
+      try {
+        const savedBgColor = await AsyncStorage.getItem('backgroundColor');
+        const savedLang = await AsyncStorage.getItem('language');
+        if (savedBgColor) setBackgroundColor(savedBgColor);
+        if (savedLang) setLanguage(savedLang as 'es' | 'en');
+      } catch (e) {
+        console.error('Error loading preferences', e);
+      }
+    };
+    loadPreferences();
+  }, []);
 
   const addToHistory = (tankId: string) => {
     if (!tankId || !tankData[tankId]) return;
@@ -195,10 +244,19 @@ export default function CalculatorScreen() {
 
   return (
     <KeyboardAvoidingView 
-      style={styles.container} 
+      style={[styles.container, { backgroundColor }]} 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <StatusBar style="light" />
+      <FloatingMenu
+        history={searchHistory}
+        onClearHistory={clearHistory}
+        onSelectHistoryItem={handleSelectHistoryItem}
+        backgroundColor={backgroundColor}
+        onChangeBackgroundColor={handleChangeBackgroundColor}
+        language={language}
+        onChangeLanguage={handleChangeLanguage}
+      />
       
       <View style={styles.header}>
         <Image 
@@ -444,7 +502,7 @@ export default function CalculatorScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0a1628',
+    backgroundColor: '#0a1628', // Default, overridden by state
   },
   scrollView: {
     flex: 1,
