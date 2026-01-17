@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Caymus Tanks",
-    "slug": "caymus-calculator",
+    "slug": "caymus-tanks",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -9,53 +9,22 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#0a0a0a"
+      "backgroundColor": "#1a1a2e"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.chyrris.caymus-tanks",
-      "buildNumber": "1",
-      "infoPlist": {
-        "UIBackgroundModes": [],
-        "ITSAppUsesNonExemptEncryption": false,
-        "NSCameraUsageDescription": "Esta app no requiere acceso a la cámara.",
-        "NSPhotoLibraryUsageDescription": "Esta app no requiere acceso a fotos."
-      },
-      "config": {
-        "usesNonExemptEncryption": false
-      }
+      "bundleIdentifier": "com.chyrris.caymus-tanks"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#0a0a0a"
+        "backgroundColor": "#1a1a2e"
       },
-      "package": "com.chyrris.caymus_tanks",
-      "versionCode": 1,
-      "permissions": [
-        "INTERNET"
-      ]
+      "package": "com.chyrris.caymus_tanks"
     },
     "web": {
       "favicon": "./assets/favicon.png",
       "bundler": "metro"
-    },
-    "extra": {
-      "eas": {
-        "projectId": "8583be63-c95e-4b16-8812-0b1c2ebee11e"
-      }
-    },
-    "runtimeVersion": "1.0.0",
-    "updates": {
-      "url": "https://u.expo.dev/8583be63-c95e-4b16-8812-0b1c2ebee11e"
-    },
-    "owner": "chyrris",
-    "description": "Calculadora profesional de volumen para tanques de vino. Calcula galones basándote en medidas de espacio vacío con precisión calibrada para campanas cónicas. Desarrollado por Chyrris Technologies Inc.",
-    "githubUrl": "https://github.com/g3lasio/caymus-tanks",
-    "privacy": "public",
-    "primaryColor": "#d4af37"
+    }
   }
 }
