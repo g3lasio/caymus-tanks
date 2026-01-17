@@ -17,11 +17,16 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.caymus.tankcalculator",
+      "bundleIdentifier": "com.chyrris.caymus-tanks",
       "buildNumber": "1",
       "infoPlist": {
         "UIBackgroundModes": [],
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSCameraUsageDescription": "Esta app no requiere acceso a la cámara.",
+        "NSPhotoLibraryUsageDescription": "Esta app no requiere acceso a fotos."
+      },
+      "config": {
+        "usesNonExemptEncryption": false
       }
     },
     "android": {
@@ -29,15 +34,31 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0a0a0a"
       },
-      "package": "com.caymus.tankcalculator",
+      "package": "com.chyrris.caymus_tanks",
       "versionCode": 1,
-      "permissions": []
+      "permissions": [
+        "INTERNET"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png",
       "bundler": "metro"
     },
-    "plugins": [],
+    "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "compileSdkVersion": 34,
+            "targetSdkVersion": 34,
+            "buildToolsVersion": "34.0.0"
+          },
+          "ios": {
+            "deploymentTarget": "13.4"
+          }
+        }
+      ]
+    ],
     "extra": {
       "eas": {
         "projectId": "8583be63-c95e-4b16-8812-0b1c2ebee11e"
@@ -46,6 +67,11 @@
     "runtimeVersion": "1.0.0",
     "updates": {
       "url": "https://u.expo.dev/8583be63-c95e-4b16-8812-0b1c2ebee11e"
-    }
+    },
+    "owner": "chyrris",
+    "description": "Calculadora profesional de volumen para tanques de vino. Calcula galones basándote en medidas de espacio vacío con precisión calibrada para campanas cónicas. Desarrollado por Chyrris Technologies Inc.",
+    "githubUrl": "https://github.com/g3lasio/caymus-tanks",
+    "privacy": "public",
+    "primaryColor": "#d4af37"
   }
 }
