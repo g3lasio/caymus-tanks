@@ -3,7 +3,7 @@
  * 
  * Propiedad de Chyrris Technologies Inc.
  * 
- * Este archivo contiene los datos de los 153 tanques de vino.
+ * Este archivo contiene los datos de los 160 tanques de vino.
  * Es la ÚNICA fuente de verdad para los datos de tanques.
  * 
  * IMPORTANTE: Cualquier modificación a los datos de tanques
@@ -11,7 +11,7 @@
  * 
  * @version 1.0.0
  * @date 2026-01-17
- * @tanks 153
+ * @tanks 160
  */
 
 // ============================================================================
@@ -242,7 +242,16 @@ const tankData: TankDataCollection = {
   "L4": { "GALS_PER_INCH": 440.64, "GALS_IN_TOP": 7551.57, "TOP_INCHES": 58.25, "TOTAL_GALS": 161555 },
   "L5": { "GALS_PER_INCH": 440.64, "GALS_IN_TOP": 7551.57, "TOP_INCHES": 58.25, "TOTAL_GALS": 161555 },
   "L6": { "GALS_PER_INCH": 440.64, "GALS_IN_TOP": 7551.57, "TOP_INCHES": 58.25, "TOTAL_GALS": 161555 },
-  "L7": { "GALS_PER_INCH": 440.64, "GALS_IN_TOP": 7551.57, "TOP_INCHES": 58.25, "TOTAL_GALS": 161555 }
+  "L7": { "GALS_PER_INCH": 440.64, "GALS_IN_TOP": 7551.57, "TOP_INCHES": 58.25, "TOTAL_GALS": 161555 },
+
+  // SERIE M - Tanques grandes (7 tanques) - Mismas dimensiones que H
+  "M1": { "GALS_PER_INCH": 440.64, "GALS_IN_TOP": 7551.57, "TOP_INCHES": 58.25, "TOTAL_GALS": 161555 },
+  "M2": { "GALS_PER_INCH": 440.64, "GALS_IN_TOP": 7551.57, "TOP_INCHES": 58.25, "TOTAL_GALS": 161555 },
+  "M3": { "GALS_PER_INCH": 440.64, "GALS_IN_TOP": 7551.57, "TOP_INCHES": 58.25, "TOTAL_GALS": 161555 },
+  "M4": { "GALS_PER_INCH": 440.64, "GALS_IN_TOP": 7551.57, "TOP_INCHES": 58.25, "TOTAL_GALS": 161555 },
+  "M5": { "GALS_PER_INCH": 440.64, "GALS_IN_TOP": 7551.57, "TOP_INCHES": 58.25, "TOTAL_GALS": 161555 },
+  "M6": { "GALS_PER_INCH": 440.64, "GALS_IN_TOP": 7551.57, "TOP_INCHES": 58.25, "TOTAL_GALS": 161555 },
+  "M7": { "GALS_PER_INCH": 440.64, "GALS_IN_TOP": 7551.57, "TOP_INCHES": 58.25, "TOTAL_GALS": 161555 }
 };
 
 // ============================================================================

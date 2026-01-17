@@ -112,7 +112,7 @@ export default function CalculatorScreen() {
     }
   };
 
-  const SERIES_ORDER = ['BL', 'BR', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'];
+  const SERIES_ORDER = ['BL', 'BR', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'];
   
   const getAllTankIds = (): string[] => {
     return Object.keys(tankData).sort((a, b) => {
