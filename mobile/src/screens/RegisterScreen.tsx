@@ -201,23 +201,23 @@ export default function RegisterScreen({
                 <View style={styles.subscriptionInfo}>
                   <Text style={styles.subscriptionText}>
                     {language === 'es' 
-                      ? '• Recibirás 7 días de prueba gratuita'
-                      : '• You will receive a 7-day free trial'}
+                      ? '• Suscripción mensual: $5.99/mes'
+                      : '• Monthly subscription: $5.99/month'}
                   </Text>
                   <Text style={styles.subscriptionText}>
                     {language === 'es' 
-                      ? '• Después, la suscripción es de $4.99/mes'
-                      : '• After that, subscription is $4.99/month'}
+                      ? '• Acceso inmediato a todas las funciones'
+                      : '• Immediate access to all features'}
                   </Text>
                   <Text style={styles.subscriptionText}>
                     {language === 'es' 
-                      ? '• Puedes cancelar en cualquier momento'
-                      : '• You can cancel at any time'}
+                      ? '• Cancela cuando quieras'
+                      : '• Cancel anytime'}
                   </Text>
                   <Text style={styles.subscriptionText}>
                     {language === 'es' 
-                      ? '• Acceso completo a todas las funciones'
-                      : '• Full access to all features'}
+                      ? '• Al cancelar, pierdes acceso al instante'
+                      : '• Upon cancellation, you lose access instantly'}
                   </Text>
                 </View>
 

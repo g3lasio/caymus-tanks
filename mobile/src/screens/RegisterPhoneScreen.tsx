@@ -44,9 +44,9 @@ const REGISTER_TRANSLATIONS = {
     loginLink: 'Inicia sesión',
     // Información de suscripción
     subscriptionTitle: 'Información de Suscripción',
-    subscriptionTrial: '7 días de prueba gratis',
-    subscriptionPrice: 'Después $4.99/mes',
+    subscriptionPrice: '$5.99/mes',
     subscriptionCancel: 'Cancela cuando quieras',
+    subscriptionAccess: 'Acceso inmediato a todas las funciones',
   },
   en: {
     title: 'Create Account',
@@ -66,9 +66,9 @@ const REGISTER_TRANSLATIONS = {
     loginLink: 'Sign in',
     // Subscription info
     subscriptionTitle: 'Subscription Information',
-    subscriptionTrial: '7-day free trial',
-    subscriptionPrice: 'Then $4.99/month',
+    subscriptionPrice: '$5.99/month',
     subscriptionCancel: 'Cancel anytime',
+    subscriptionAccess: 'Immediate access to all features',
   },
 };
 
@@ -182,8 +182,8 @@ export default function RegisterPhoneScreen({
           <View style={styles.subscriptionInfo}>
             <Text style={styles.subscriptionTitle}>💳 {t.subscriptionTitle}</Text>
             <View style={styles.subscriptionDetails}>
-              <Text style={styles.subscriptionItem}>✓ {t.subscriptionTrial}</Text>
               <Text style={styles.subscriptionItem}>✓ {t.subscriptionPrice}</Text>
+              <Text style={styles.subscriptionItem}>✓ {t.subscriptionAccess}</Text>
               <Text style={styles.subscriptionItem}>✓ {t.subscriptionCancel}</Text>
             </View>
           </View>

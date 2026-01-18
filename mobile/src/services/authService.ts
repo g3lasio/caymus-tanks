@@ -505,13 +505,13 @@ export const registerUser = async (
       isOwner: ownerStatus,
     });
     
-    // Si no es propietario, iniciar período de prueba o requerir suscripción
+    // Si no es propietario, marcar como pendiente de suscripción
+    // No hay período de prueba - deben suscribirse para acceder
     if (!ownerStatus) {
       const existingStatus = await AsyncStorage.getItem(STORAGE_KEYS.SUBSCRIPTION_STATUS);
       if (!existingStatus) {
-        // Nuevo usuario: dar 7 días de prueba
-        await AsyncStorage.setItem(STORAGE_KEYS.SUBSCRIPTION_STATUS, 'trial');
-        await AsyncStorage.setItem(STORAGE_KEYS.SUBSCRIPTION_EXPIRY, (Date.now() + 7 * 24 * 60 * 60 * 1000).toString());
+        // Nuevo usuario: estado pendiente hasta que se suscriba
+        await AsyncStorage.setItem(STORAGE_KEYS.SUBSCRIPTION_STATUS, 'pending');
       }
     }
     
