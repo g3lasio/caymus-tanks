@@ -77,7 +77,6 @@ jobs:
           sed -i '' 's/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;/g' "$XCODEPROJ/project.pbxproj"
           sed -i '' 's/"CODE_SIGN_IDENTITY\[sdk=iphoneos\*\]" = "iPhone Developer";/"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Distribution";/g' "$XCODEPROJ/project.pbxproj"
           
-          grep -n "DEVELOPMENT_TEAM" "$XCODEPROJ/project.pbxproj" | head -5
           echo "Code signing configured"
 
       - name: Install CocoaPods dependencies
@@ -100,7 +99,7 @@ jobs:
             DEVELOPMENT_TEAM=UW276ZH5Q7 \
             CODE_SIGN_STYLE=Manual \
             CODE_SIGN_IDENTITY="Apple Distribution" \
-            PROVISIONING_PROFILE_SPECIFIER="*[expo] com.chyrris.caymus-tanks AppStore 2026-01-18T01:48:55.662Z" \
+            PROVISIONING_PROFILE_SPECIFIER="caymus-tanks-appstore-2026" \
             archive
 
       - name: Export IPA
