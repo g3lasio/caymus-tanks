@@ -24,7 +24,8 @@ interface FloatingMenuProps {
   onSelectHistoryItem: (tankId: string) => void;
   language: Language;
   onChangeLanguage: (lang: Language) => void;
-  isAuthenticated?: boolean;
+  userName?: string;
+  isOwner?: boolean;
   onLogout?: () => void;
 }
 
@@ -48,7 +49,8 @@ export default function FloatingMenu({
   onSelectHistoryItem,
   language,
   onChangeLanguage,
-  isAuthenticated = false,
+  userName = '',
+  isOwner = false,
   onLogout,
 }: FloatingMenuProps) {
   const [currentPage, setCurrentPage] = useState<PageType>(null);
@@ -263,6 +265,21 @@ export default function FloatingMenu({
             {/* Spacer para empujar elementos al fondo */}
             <View style={styles.spacer} />
 
+            {/* Información del usuario */}
+            {userName && (
+              <View style={styles.userInfoContainer}>
+                <Text style={styles.userIcon}>{isOwner ? '👑' : '👤'}</Text>
+                <View style={styles.userDetails}>
+                  <Text style={styles.userName}>{userName}</Text>
+                  {isOwner && (
+                    <Text style={styles.ownerBadge}>
+                      {language === 'es' ? 'Propietario' : 'Owner'}
+                    </Text>
+                  )}
+                </View>
+              </View>
+            )}
+
             {/* Toggle de idioma al final */}
             <View style={styles.languageToggleContainer}>
               <Text style={styles.languageLabel}>ES</Text>
@@ -277,13 +294,11 @@ export default function FloatingMenu({
               <Text style={styles.languageLabel}>EN</Text>
             </View>
 
-            {/* Botón de Logout (solo si está autenticado) */}
-            {isAuthenticated && (
-              <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-                <Text style={styles.logoutIcon}>🚪</Text>
-                <Text style={styles.logoutText}>{t.logout}</Text>
-              </TouchableOpacity>
-            )}
+            {/* Botón de Logout (siempre visible) */}
+            <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+              <Text style={styles.logoutIcon}>🚪</Text>
+              <Text style={styles.logoutText}>{t.logout}</Text>
+            </TouchableOpacity>
 
             <TouchableOpacity style={styles.menuCloseButton} onPress={onClose}>
               <Text style={styles.menuCloseButtonText}>{t.close}</Text>
@@ -376,6 +391,35 @@ const styles = StyleSheet.create({
   },
   spacer: {
     flex: 1,
+  },
+  userInfoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    marginBottom: 10,
+    backgroundColor: 'rgba(0, 212, 255, 0.1)',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 212, 255, 0.3)',
+  },
+  userIcon: {
+    fontSize: 24,
+    marginRight: 10,
+  },
+  userDetails: {
+    flex: 1,
+  },
+  userName: {
+    color: '#ccd6f6',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  ownerBadge: {
+    color: '#ffd700',
+    fontSize: 12,
+    fontWeight: 'bold',
+    marginTop: 2,
   },
   languageToggleContainer: {
     flexDirection: 'row',

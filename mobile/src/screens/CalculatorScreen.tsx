@@ -24,7 +24,17 @@ interface HistoryItem {
   timestamp: number;
 }
 
-export default function CalculatorScreen() {
+interface CalculatorScreenProps {
+  userName?: string;
+  isOwner?: boolean;
+  onLogout?: () => void;
+}
+
+export default function CalculatorScreen({
+  userName = '',
+  isOwner = false,
+  onLogout,
+}: CalculatorScreenProps) {
   const [selectedTankId, setSelectedTankId] = useState<string>('');
   const [selectedTank, setSelectedTank] = useState<TankData | null>(null);
   const [fillPercentage, setFillPercentage] = useState<number>(50);
@@ -36,7 +46,6 @@ export default function CalculatorScreen() {
   const [tankSearch, setTankSearch] = useState<string>('');
   const [language, setLanguage] = useState<Language>('es');
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
 
   const t = TRANSLATIONS[language];
 
@@ -57,7 +66,6 @@ export default function CalculatorScreen() {
   useEffect(() => {
     loadHistory();
     loadPreferences();
-    checkAuthStatus();
   }, []);
 
   const loadHistory = async () => {
@@ -77,15 +85,6 @@ export default function CalculatorScreen() {
       if (savedLang) setLanguage(savedLang as Language);
     } catch (e) {
       console.error('Error loading preferences', e);
-    }
-  };
-
-  const checkAuthStatus = async () => {
-    try {
-      const authToken = await AsyncStorage.getItem('authToken');
-      setIsAuthenticated(!!authToken);
-    } catch (e) {
-      console.error('Error checking auth status', e);
     }
   };
 
@@ -119,15 +118,9 @@ export default function CalculatorScreen() {
     }
   };
 
-  const handleLogout = async () => {
-    try {
-      await AsyncStorage.removeItem('authToken');
-      await AsyncStorage.removeItem('userPhone');
-      await AsyncStorage.removeItem('deviceId');
-      setIsAuthenticated(false);
-      // En producción, aquí navegaríamos a la pantalla de login
-    } catch (e) {
-      console.error('Error logging out', e);
+  const handleLogoutPress = () => {
+    if (onLogout) {
+      onLogout();
     }
   };
 
@@ -288,8 +281,9 @@ export default function CalculatorScreen() {
         }}
         language={language}
         onChangeLanguage={handleChangeLanguage}
-        isAuthenticated={isAuthenticated}
-        onLogout={handleLogout}
+        userName={userName}
+        isOwner={isOwner}
+        onLogout={handleLogoutPress}
       />
 
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>

@@ -10,17 +10,21 @@ import { View, ActivityIndicator, StyleSheet, Modal, ScrollView, Text, Touchable
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import LoginScreen from './screens/LoginScreen';
 import OTPScreen from './screens/OTPScreen';
+import RegisterScreen from './screens/RegisterScreen';
 import CalculatorScreen from './screens/CalculatorScreen';
-import { checkSession, logout } from './services/authService';
+import { checkSession, logout, isOwnerPhone, SessionInfo } from './services/authService';
 import { Language, LEGAL_CONTENT } from './i18n/translations';
 
-type AuthState = 'loading' | 'login' | 'otp' | 'authenticated';
+type AuthState = 'loading' | 'login' | 'otp' | 'register' | 'authenticated';
 
 export default function App() {
   const [authState, setAuthState] = useState<AuthState>('loading');
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [userName, setUserName] = useState('');
+  const [isOwner, setIsOwner] = useState(false);
   const [language, setLanguage] = useState<Language>('es');
   const [showLegalModal, setShowLegalModal] = useState<'terms' | 'privacy' | null>(null);
+  const [showWelcome, setShowWelcome] = useState(false);
 
   // Verificar sesión al iniciar
   useEffect(() => {
@@ -32,7 +36,16 @@ export default function App() {
     try {
       const session = await checkSession();
       if (session.isAuthenticated) {
-        setAuthState('authenticated');
+        setPhoneNumber(session.phone || '');
+        setUserName(session.userName || '');
+        setIsOwner(session.isOwner || false);
+        
+        // Si está autenticado pero no registrado, ir a registro
+        if (!session.isRegistered) {
+          setAuthState('register');
+        } else {
+          setAuthState('authenticated');
+        }
       } else {
         setAuthState('login');
       }
@@ -64,11 +77,41 @@ export default function App() {
 
   const handleOTPSent = (phone: string) => {
     setPhoneNumber(phone);
+    setIsOwner(isOwnerPhone(phone));
     setAuthState('otp');
   };
 
-  const handleVerified = () => {
+  const handleVerified = async (verifyResult: { isNewUser?: boolean; isOwner?: boolean; userName?: string }) => {
+    setIsOwner(verifyResult.isOwner || false);
+    
+    if (verifyResult.userName) {
+      setUserName(verifyResult.userName);
+    }
+    
+    // Si es usuario nuevo o no tiene nombre, ir a registro
+    if (verifyResult.isNewUser || !verifyResult.userName) {
+      setAuthState('register');
+    } else {
+      // Usuario existente con nombre, mostrar bienvenida
+      setShowWelcome(true);
+      setAuthState('authenticated');
+      
+      // Ocultar bienvenida después de 3 segundos
+      setTimeout(() => {
+        setShowWelcome(false);
+      }, 3000);
+    }
+  };
+
+  const handleRegistered = (name: string) => {
+    setUserName(name);
+    setShowWelcome(true);
     setAuthState('authenticated');
+    
+    // Ocultar bienvenida después de 3 segundos
+    setTimeout(() => {
+      setShowWelcome(false);
+    }, 3000);
   };
 
   const handleChangeNumber = () => {
@@ -80,6 +123,8 @@ export default function App() {
     await logout();
     setAuthState('login');
     setPhoneNumber('');
+    setUserName('');
+    setIsOwner(false);
   };
 
   // Modal para mostrar términos y privacidad
@@ -102,6 +147,33 @@ export default function App() {
           <ScrollView style={styles.modalContent}>
             <Text style={styles.legalText}>{content.content}</Text>
           </ScrollView>
+        </View>
+      </Modal>
+    );
+  };
+
+  // Modal de bienvenida
+  const renderWelcomeModal = () => {
+    if (!showWelcome) return null;
+
+    return (
+      <Modal visible={true} animationType="fade" transparent={true}>
+        <View style={styles.welcomeOverlay}>
+          <View style={styles.welcomeContainer}>
+            <Text style={styles.welcomeIcon}>{isOwner ? '👑' : '🎉'}</Text>
+            <Text style={styles.welcomeTitle}>
+              {language === 'es' 
+                ? `¡Bienvenido${userName ? ', ' + userName : ''}!`
+                : `Welcome${userName ? ', ' + userName : ''}!`}
+            </Text>
+            {isOwner && (
+              <Text style={styles.welcomeSubtitle}>
+                {language === 'es' 
+                  ? 'Cuenta de Propietario - Acceso Completo'
+                  : 'Owner Account - Full Access'}
+              </Text>
+            )}
+          </View>
         </View>
       </Modal>
     );
@@ -144,8 +216,34 @@ export default function App() {
     );
   }
 
+  // Pantalla de registro
+  if (authState === 'register') {
+    return (
+      <>
+        <RegisterScreen
+          phoneNumber={phoneNumber}
+          isOwner={isOwner}
+          onRegistered={handleRegistered}
+          onShowTerms={() => setShowLegalModal('terms')}
+          onShowPrivacy={() => setShowLegalModal('privacy')}
+          language={language}
+        />
+        {renderLegalModal()}
+      </>
+    );
+  }
+
   // Pantalla principal (calculadora)
-  return <CalculatorScreen />;
+  return (
+    <>
+      <CalculatorScreen 
+        userName={userName}
+        isOwner={isOwner}
+        onLogout={handleLogout}
+      />
+      {renderWelcomeModal()}
+    </>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -198,5 +296,36 @@ const styles = StyleSheet.create({
     color: '#ccd6f6',
     fontSize: 14,
     lineHeight: 22,
+  },
+  welcomeOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(10, 22, 40, 0.95)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  welcomeContainer: {
+    backgroundColor: '#112240',
+    borderRadius: 20,
+    padding: 40,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#00d4ff',
+    marginHorizontal: 40,
+  },
+  welcomeIcon: {
+    fontSize: 64,
+    marginBottom: 20,
+  },
+  welcomeTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#00d4ff',
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  welcomeSubtitle: {
+    fontSize: 16,
+    color: '#ffd700',
+    textAlign: 'center',
   },
 });

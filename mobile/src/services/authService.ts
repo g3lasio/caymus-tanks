@@ -7,6 +7,8 @@
  * - Verificación de códigos OTP
  * - Gestión de sesiones (30 días remember me)
  * - Restricción de dispositivo único
+ * - Registro de nuevos usuarios con nombre
+ * - Lógica de propietario (acceso gratuito)
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -28,15 +30,29 @@ const TWILIO_CONFIG = {
 };
 
 // ============================================================================
+// CONFIGURACIÓN DE PROPIETARIO
+// ============================================================================
+
+// Números de teléfono con acceso gratuito permanente (propietarios)
+const OWNER_PHONE_NUMBERS = [
+  '+12025493519',  // Número del propietario principal
+];
+
+// ============================================================================
 // CONSTANTES
 // ============================================================================
 
 const STORAGE_KEYS = {
   AUTH_TOKEN: 'authToken',
   USER_PHONE: 'userPhone',
+  USER_NAME: 'userName',
   DEVICE_ID: 'deviceId',
   SESSION_EXPIRY: 'sessionExpiry',
   REMEMBER_ME: 'rememberMe',
+  IS_REGISTERED: 'isRegistered',
+  IS_OWNER: 'isOwner',
+  SUBSCRIPTION_STATUS: 'subscriptionStatus',
+  SUBSCRIPTION_EXPIRY: 'subscriptionExpiry',
 };
 
 // Duración de la sesión: 30 días en milisegundos
@@ -54,14 +70,28 @@ export interface AuthResult {
 
 export interface VerifyResult extends AuthResult {
   isNewUser?: boolean;
+  isOwner?: boolean;
   deviceMismatch?: boolean;
+  userName?: string;
 }
 
 export interface SessionInfo {
   isAuthenticated: boolean;
   phone?: string;
+  userName?: string;
   deviceId?: string;
   expiresAt?: number;
+  isOwner?: boolean;
+  isRegistered?: boolean;
+  subscriptionStatus?: 'active' | 'expired' | 'trial' | 'none';
+}
+
+export interface UserProfile {
+  phone: string;
+  name: string;
+  isOwner: boolean;
+  subscriptionStatus: 'active' | 'expired' | 'trial' | 'none';
+  subscriptionExpiry?: number;
 }
 
 // ============================================================================
@@ -132,6 +162,14 @@ const formatPhoneNumber = (phone: string): string => {
   }
   
   return cleaned;
+};
+
+/**
+ * Verifica si un número de teléfono es de un propietario
+ */
+export const isOwnerPhone = (phone: string): boolean => {
+  const formattedPhone = formatPhoneNumber(phone);
+  return OWNER_PHONE_NUMBERS.includes(formattedPhone);
 };
 
 // ============================================================================
@@ -215,19 +253,38 @@ export const verifyOTP = async (
     
     if (response.ok && data.status === 'approved') {
       // Código verificado exitosamente
-      // Guardar la sesión
       const expiryTime = Date.now() + SESSION_DURATION_MS;
       const authToken = `${formattedPhone}_${currentDeviceId}_${Date.now()}`;
       
+      // Verificar si es un usuario existente
+      const existingPhone = await AsyncStorage.getItem(STORAGE_KEYS.USER_PHONE);
+      const existingName = await AsyncStorage.getItem(STORAGE_KEYS.USER_NAME);
+      const isRegistered = await AsyncStorage.getItem(STORAGE_KEYS.IS_REGISTERED);
+      const isNewUser = existingPhone !== formattedPhone || isRegistered !== 'true';
+      
+      // Verificar si es propietario
+      const ownerStatus = isOwnerPhone(formattedPhone);
+      
+      // Guardar la sesión
       await AsyncStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, authToken);
       await AsyncStorage.setItem(STORAGE_KEYS.USER_PHONE, formattedPhone);
       await AsyncStorage.setItem(STORAGE_KEYS.SESSION_EXPIRY, expiryTime.toString());
       await AsyncStorage.setItem(STORAGE_KEYS.REMEMBER_ME, rememberMe.toString());
+      await AsyncStorage.setItem(STORAGE_KEYS.IS_OWNER, ownerStatus.toString());
+      
+      // Si es propietario, dar suscripción permanente
+      if (ownerStatus) {
+        await AsyncStorage.setItem(STORAGE_KEYS.SUBSCRIPTION_STATUS, 'active');
+        // Fecha muy lejana para propietarios
+        await AsyncStorage.setItem(STORAGE_KEYS.SUBSCRIPTION_EXPIRY, (Date.now() + 100 * 365 * 24 * 60 * 60 * 1000).toString());
+      }
       
       return {
         success: true,
-        message: 'Verificación exitosa',
-        isNewUser: false, // TODO: Verificar en base de datos
+        message: ownerStatus ? '¡Bienvenido, propietario!' : 'Verificación exitosa',
+        isNewUser,
+        isOwner: ownerStatus,
+        userName: existingName || undefined,
       };
     } else {
       return {
@@ -247,15 +304,80 @@ export const verifyOTP = async (
 };
 
 /**
+ * Registra un nuevo usuario con su nombre
+ */
+export const registerUser = async (
+  name: string,
+  acceptedTerms: boolean = true
+): Promise<AuthResult> => {
+  try {
+    if (!name || name.trim().length < 2) {
+      return {
+        success: false,
+        message: 'El nombre debe tener al menos 2 caracteres',
+      };
+    }
+    
+    if (!acceptedTerms) {
+      return {
+        success: false,
+        message: 'Debes aceptar los términos y condiciones',
+      };
+    }
+    
+    const phone = await AsyncStorage.getItem(STORAGE_KEYS.USER_PHONE);
+    if (!phone) {
+      return {
+        success: false,
+        message: 'No hay sesión activa',
+      };
+    }
+    
+    // Guardar el nombre y marcar como registrado
+    await AsyncStorage.setItem(STORAGE_KEYS.USER_NAME, name.trim());
+    await AsyncStorage.setItem(STORAGE_KEYS.IS_REGISTERED, 'true');
+    
+    // Verificar si es propietario
+    const ownerStatus = isOwnerPhone(phone);
+    
+    // Si no es propietario, iniciar período de prueba o requerir suscripción
+    if (!ownerStatus) {
+      const existingStatus = await AsyncStorage.getItem(STORAGE_KEYS.SUBSCRIPTION_STATUS);
+      if (!existingStatus) {
+        // Nuevo usuario: dar 7 días de prueba
+        await AsyncStorage.setItem(STORAGE_KEYS.SUBSCRIPTION_STATUS, 'trial');
+        await AsyncStorage.setItem(STORAGE_KEYS.SUBSCRIPTION_EXPIRY, (Date.now() + 7 * 24 * 60 * 60 * 1000).toString());
+      }
+    }
+    
+    return {
+      success: true,
+      message: `¡Bienvenido, ${name.trim()}!`,
+    };
+  } catch (error) {
+    console.error('Error registering user:', error);
+    return {
+      success: false,
+      message: 'Error al registrar usuario',
+      error: error instanceof Error ? error.message : 'Error desconocido',
+    };
+  }
+};
+
+/**
  * Verifica si hay una sesión activa válida
  */
 export const checkSession = async (): Promise<SessionInfo> => {
   try {
     const authToken = await AsyncStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
     const phone = await AsyncStorage.getItem(STORAGE_KEYS.USER_PHONE);
+    const userName = await AsyncStorage.getItem(STORAGE_KEYS.USER_NAME);
     const deviceId = await AsyncStorage.getItem(STORAGE_KEYS.DEVICE_ID);
     const expiryStr = await AsyncStorage.getItem(STORAGE_KEYS.SESSION_EXPIRY);
     const rememberMe = await AsyncStorage.getItem(STORAGE_KEYS.REMEMBER_ME);
+    const isRegistered = await AsyncStorage.getItem(STORAGE_KEYS.IS_REGISTERED);
+    const isOwner = await AsyncStorage.getItem(STORAGE_KEYS.IS_OWNER);
+    const subscriptionStatus = await AsyncStorage.getItem(STORAGE_KEYS.SUBSCRIPTION_STATUS);
     
     if (!authToken || !phone || !expiryStr) {
       return { isAuthenticated: false };
@@ -279,8 +401,12 @@ export const checkSession = async (): Promise<SessionInfo> => {
     return {
       isAuthenticated: true,
       phone,
+      userName: userName || undefined,
       deviceId: deviceId || undefined,
       expiresAt,
+      isOwner: isOwner === 'true',
+      isRegistered: isRegistered === 'true',
+      subscriptionStatus: (subscriptionStatus as SessionInfo['subscriptionStatus']) || 'none',
     };
   } catch (error) {
     console.error('Error checking session:', error);
@@ -294,12 +420,58 @@ export const checkSession = async (): Promise<SessionInfo> => {
 export const logout = async (): Promise<void> => {
   try {
     await AsyncStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
-    await AsyncStorage.removeItem(STORAGE_KEYS.USER_PHONE);
     await AsyncStorage.removeItem(STORAGE_KEYS.SESSION_EXPIRY);
     await AsyncStorage.removeItem(STORAGE_KEYS.REMEMBER_ME);
+    // Mantener USER_PHONE, USER_NAME, IS_REGISTERED para reconocer al usuario
     // No eliminamos DEVICE_ID para mantener la restricción de dispositivo
   } catch (error) {
     console.error('Error logging out:', error);
+  }
+};
+
+/**
+ * Cierra sesión completamente (borra todos los datos)
+ */
+export const logoutComplete = async (): Promise<void> => {
+  try {
+    await AsyncStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+    await AsyncStorage.removeItem(STORAGE_KEYS.USER_PHONE);
+    await AsyncStorage.removeItem(STORAGE_KEYS.USER_NAME);
+    await AsyncStorage.removeItem(STORAGE_KEYS.SESSION_EXPIRY);
+    await AsyncStorage.removeItem(STORAGE_KEYS.REMEMBER_ME);
+    await AsyncStorage.removeItem(STORAGE_KEYS.IS_REGISTERED);
+    await AsyncStorage.removeItem(STORAGE_KEYS.IS_OWNER);
+    await AsyncStorage.removeItem(STORAGE_KEYS.SUBSCRIPTION_STATUS);
+    await AsyncStorage.removeItem(STORAGE_KEYS.SUBSCRIPTION_EXPIRY);
+    // No eliminamos DEVICE_ID
+  } catch (error) {
+    console.error('Error logging out completely:', error);
+  }
+};
+
+/**
+ * Obtiene el perfil del usuario actual
+ */
+export const getUserProfile = async (): Promise<UserProfile | null> => {
+  try {
+    const phone = await AsyncStorage.getItem(STORAGE_KEYS.USER_PHONE);
+    const name = await AsyncStorage.getItem(STORAGE_KEYS.USER_NAME);
+    const isOwner = await AsyncStorage.getItem(STORAGE_KEYS.IS_OWNER);
+    const subscriptionStatus = await AsyncStorage.getItem(STORAGE_KEYS.SUBSCRIPTION_STATUS);
+    const subscriptionExpiry = await AsyncStorage.getItem(STORAGE_KEYS.SUBSCRIPTION_EXPIRY);
+    
+    if (!phone) return null;
+    
+    return {
+      phone,
+      name: name || '',
+      isOwner: isOwner === 'true',
+      subscriptionStatus: (subscriptionStatus as UserProfile['subscriptionStatus']) || 'none',
+      subscriptionExpiry: subscriptionExpiry ? parseInt(subscriptionExpiry, 10) : undefined,
+    };
+  } catch (error) {
+    console.error('Error getting user profile:', error);
+    return null;
   }
 };
 
@@ -311,10 +483,65 @@ export const getCurrentUserPhone = async (): Promise<string | null> => {
 };
 
 /**
+ * Obtiene el nombre del usuario actual
+ */
+export const getCurrentUserName = async (): Promise<string | null> => {
+  return AsyncStorage.getItem(STORAGE_KEYS.USER_NAME);
+};
+
+/**
  * Obtiene el ID del dispositivo actual
  */
 export const getCurrentDeviceId = async (): Promise<string | null> => {
   return AsyncStorage.getItem(STORAGE_KEYS.DEVICE_ID);
+};
+
+/**
+ * Verifica el estado de la suscripción
+ */
+export const checkSubscription = async (): Promise<{
+  isActive: boolean;
+  status: 'active' | 'expired' | 'trial' | 'none';
+  daysRemaining?: number;
+}> => {
+  try {
+    const isOwner = await AsyncStorage.getItem(STORAGE_KEYS.IS_OWNER);
+    
+    // Propietarios siempre tienen acceso
+    if (isOwner === 'true') {
+      return { isActive: true, status: 'active' };
+    }
+    
+    const status = await AsyncStorage.getItem(STORAGE_KEYS.SUBSCRIPTION_STATUS);
+    const expiryStr = await AsyncStorage.getItem(STORAGE_KEYS.SUBSCRIPTION_EXPIRY);
+    
+    if (!status || status === 'none') {
+      return { isActive: false, status: 'none' };
+    }
+    
+    if (expiryStr) {
+      const expiry = parseInt(expiryStr, 10);
+      const now = Date.now();
+      
+      if (now > expiry) {
+        // Suscripción expirada
+        await AsyncStorage.setItem(STORAGE_KEYS.SUBSCRIPTION_STATUS, 'expired');
+        return { isActive: false, status: 'expired' };
+      }
+      
+      const daysRemaining = Math.ceil((expiry - now) / (24 * 60 * 60 * 1000));
+      return {
+        isActive: true,
+        status: status as 'active' | 'trial',
+        daysRemaining,
+      };
+    }
+    
+    return { isActive: status === 'active', status: status as 'active' | 'expired' | 'trial' | 'none' };
+  } catch (error) {
+    console.error('Error checking subscription:', error);
+    return { isActive: false, status: 'none' };
+  }
 };
 
 // ============================================================================
@@ -324,8 +551,14 @@ export const getCurrentDeviceId = async (): Promise<string | null> => {
 export default {
   sendOTP,
   verifyOTP,
+  registerUser,
   checkSession,
   logout,
+  logoutComplete,
+  getUserProfile,
   getCurrentUserPhone,
+  getCurrentUserName,
   getCurrentDeviceId,
+  isOwnerPhone,
+  checkSubscription,
 };

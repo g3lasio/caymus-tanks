@@ -57,7 +57,7 @@ const OTP_TRANSLATIONS = {
 
 interface OTPScreenProps {
   phoneNumber: string;
-  onVerified: () => void;
+  onVerified: (result: { isNewUser?: boolean; isOwner?: boolean; userName?: string }) => void;
   onChangeNumber: () => void;
   language: Language;
 }
@@ -138,7 +138,11 @@ export default function OTPScreen({
       const result = await verifyOTP(phoneNumber, fullCode, true);
       
       if (result.success) {
-        onVerified();
+        onVerified({
+          isNewUser: result.isNewUser,
+          isOwner: result.isOwner,
+          userName: result.userName,
+        });
       } else {
         setError(result.error || t.errorVerifyFailed);
         // Limpiar el código en caso de error
