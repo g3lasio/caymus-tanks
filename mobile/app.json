@@ -6,6 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
+    "entryPoint": "./index.js",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
@@ -16,7 +17,6 @@
       "bundleIdentifier": "com.chyrris.caymus-tanks",
       "buildNumber": "1",
       "infoPlist": {
-        "NSCameraUsageDescription": "This app does not use the camera.",
         "CFBundleDisplayName": "Caymus Tank Calculator"
       }
     },
