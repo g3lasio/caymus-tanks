@@ -3,19 +3,29 @@
  * Propiedad de Chyrris Technologies Inc.
  * 
  * Maneja la navegación entre pantallas de autenticación y la calculadora
+ * Flujo: Login (usuarios existentes) / Registro (nuevos usuarios)
  */
 
 import React, { useState, useEffect } from 'react';
 import { View, ActivityIndicator, StyleSheet, Modal, ScrollView, Text, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import LoginScreen from './screens/LoginScreen';
+import RegisterPhoneScreen from './screens/RegisterPhoneScreen';
 import OTPScreen from './screens/OTPScreen';
 import RegisterScreen from './screens/RegisterScreen';
 import CalculatorScreen from './screens/CalculatorScreen';
 import { checkSession, logout, isOwnerPhone, SessionInfo } from './services/authService';
 import { Language, LEGAL_CONTENT } from './i18n/translations';
 
-type AuthState = 'loading' | 'login' | 'otp' | 'register' | 'authenticated';
+// Estados de autenticación
+type AuthState = 
+  | 'loading'           // Cargando sesión
+  | 'login'             // Pantalla de login (usuarios existentes)
+  | 'register_phone'    // Pantalla de registro paso 1 (teléfono)
+  | 'otp_login'         // OTP para login
+  | 'otp_register'      // OTP para registro
+  | 'register_profile'  // Registro paso 2 (nombre y términos)
+  | 'authenticated';    // Usuario autenticado
 
 export default function App() {
   const [authState, setAuthState] = useState<AuthState>('loading');
@@ -40,13 +50,14 @@ export default function App() {
         setUserName(session.userName || '');
         setIsOwner(session.isOwner || false);
         
-        // Si está autenticado pero no registrado, ir a registro
+        // Si está autenticado pero no registrado, ir a registro de perfil
         if (!session.isRegistered) {
-          setAuthState('register');
+          setAuthState('register_profile');
         } else {
           setAuthState('authenticated');
         }
       } else {
+        // Por defecto, mostrar login (usuarios existentes)
         setAuthState('login');
       }
     } catch (error) {
@@ -75,11 +86,31 @@ export default function App() {
     }
   };
 
-  const handleOTPSent = (phone: string) => {
+  // === HANDLERS PARA LOGIN ===
+  
+  const handleLoginOTPSent = (phone: string) => {
     setPhoneNumber(phone);
     setIsOwner(isOwnerPhone(phone));
-    setAuthState('otp');
+    setAuthState('otp_login');
   };
+
+  const handleGoToRegister = () => {
+    setAuthState('register_phone');
+  };
+
+  // === HANDLERS PARA REGISTRO ===
+
+  const handleRegisterOTPSent = (phone: string, ownerStatus: boolean) => {
+    setPhoneNumber(phone);
+    setIsOwner(ownerStatus);
+    setAuthState('otp_register');
+  };
+
+  const handleGoToLogin = () => {
+    setAuthState('login');
+  };
+
+  // === HANDLERS PARA OTP ===
 
   const handleVerified = async (verifyResult: { isNewUser?: boolean; isOwner?: boolean; userName?: string }) => {
     setIsOwner(verifyResult.isOwner || false);
@@ -88,9 +119,9 @@ export default function App() {
       setUserName(verifyResult.userName);
     }
     
-    // Si es usuario nuevo o no tiene nombre, ir a registro
+    // Si es usuario nuevo o no tiene nombre, ir a registro de perfil
     if (verifyResult.isNewUser || !verifyResult.userName) {
-      setAuthState('register');
+      setAuthState('register_profile');
     } else {
       // Usuario existente con nombre, mostrar bienvenida
       setShowWelcome(true);
@@ -103,6 +134,18 @@ export default function App() {
     }
   };
 
+  const handleChangeNumber = () => {
+    // Volver a la pantalla anterior según el flujo
+    if (authState === 'otp_login') {
+      setAuthState('login');
+    } else if (authState === 'otp_register') {
+      setAuthState('register_phone');
+    }
+    setPhoneNumber('');
+  };
+
+  // === HANDLERS PARA REGISTRO DE PERFIL ===
+
   const handleRegistered = (name: string) => {
     setUserName(name);
     setShowWelcome(true);
@@ -114,10 +157,7 @@ export default function App() {
     }, 3000);
   };
 
-  const handleChangeNumber = () => {
-    setAuthState('login');
-    setPhoneNumber('');
-  };
+  // === HANDLER PARA LOGOUT ===
 
   const handleLogout = async () => {
     await logout();
@@ -126,6 +166,8 @@ export default function App() {
     setUserName('');
     setIsOwner(false);
   };
+
+  // === MODALES ===
 
   // Modal para mostrar términos y privacidad
   const renderLegalModal = () => {
@@ -179,6 +221,8 @@ export default function App() {
     );
   };
 
+  // === RENDERIZADO DE PANTALLAS ===
+
   // Pantalla de carga
   if (authState === 'loading') {
     return (
@@ -188,14 +232,15 @@ export default function App() {
     );
   }
 
-  // Pantalla de login
+  // Pantalla de login (usuarios existentes)
   if (authState === 'login') {
     return (
       <>
         <LoginScreen
-          onOTPSent={handleOTPSent}
+          onOTPSent={handleLoginOTPSent}
           onShowTerms={() => setShowLegalModal('terms')}
           onShowPrivacy={() => setShowLegalModal('privacy')}
+          onGoToRegister={handleGoToRegister}
           language={language}
           onChangeLanguage={handleLanguageChange}
         />
@@ -204,8 +249,25 @@ export default function App() {
     );
   }
 
-  // Pantalla de OTP
-  if (authState === 'otp') {
+  // Pantalla de registro paso 1 (teléfono)
+  if (authState === 'register_phone') {
+    return (
+      <>
+        <RegisterPhoneScreen
+          onOTPSent={handleRegisterOTPSent}
+          onShowTerms={() => setShowLegalModal('terms')}
+          onShowPrivacy={() => setShowLegalModal('privacy')}
+          onGoToLogin={handleGoToLogin}
+          language={language}
+          onChangeLanguage={handleLanguageChange}
+        />
+        {renderLegalModal()}
+      </>
+    );
+  }
+
+  // Pantalla de OTP (tanto para login como registro)
+  if (authState === 'otp_login' || authState === 'otp_register') {
     return (
       <OTPScreen
         phoneNumber={phoneNumber}
@@ -216,8 +278,8 @@ export default function App() {
     );
   }
 
-  // Pantalla de registro
-  if (authState === 'register') {
+  // Pantalla de registro paso 2 (nombre y términos)
+  if (authState === 'register_profile') {
     return (
       <>
         <RegisterScreen

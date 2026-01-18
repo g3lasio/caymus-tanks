@@ -9,6 +9,7 @@
  * - Restricción de dispositivo único
  * - Registro de nuevos usuarios con nombre
  * - Lógica de propietario (acceso gratuito)
+ * - Validación de usuarios registrados vs nuevos
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -37,6 +38,14 @@ const TWILIO_CONFIG = {
 const OWNER_PHONE_NUMBERS = [
   '+12025493519',  // Número del propietario principal
 ];
+
+// ============================================================================
+// BASE DE DATOS LOCAL DE USUARIOS REGISTRADOS
+// ============================================================================
+
+// En una implementación real, esto sería una base de datos en el servidor
+// Por ahora usamos AsyncStorage para simular la base de datos local
+const REGISTERED_USERS_KEY = 'registeredUsers';
 
 // ============================================================================
 // CONSTANTES
@@ -92,6 +101,13 @@ export interface UserProfile {
   isOwner: boolean;
   subscriptionStatus: 'active' | 'expired' | 'trial' | 'none';
   subscriptionExpiry?: number;
+}
+
+export interface RegisteredUser {
+  phone: string;
+  name: string;
+  registeredAt: number;
+  isOwner: boolean;
 }
 
 // ============================================================================
@@ -173,15 +189,95 @@ export const isOwnerPhone = (phone: string): boolean => {
 };
 
 // ============================================================================
+// FUNCIONES DE GESTIÓN DE USUARIOS REGISTRADOS
+// ============================================================================
+
+/**
+ * Obtiene la lista de usuarios registrados
+ */
+const getRegisteredUsers = async (): Promise<RegisteredUser[]> => {
+  try {
+    const usersJson = await AsyncStorage.getItem(REGISTERED_USERS_KEY);
+    return usersJson ? JSON.parse(usersJson) : [];
+  } catch (error) {
+    console.error('Error getting registered users:', error);
+    return [];
+  }
+};
+
+/**
+ * Guarda un nuevo usuario en la lista de registrados
+ */
+const saveRegisteredUser = async (user: RegisteredUser): Promise<void> => {
+  try {
+    const users = await getRegisteredUsers();
+    // Verificar si ya existe
+    const existingIndex = users.findIndex(u => u.phone === user.phone);
+    if (existingIndex >= 0) {
+      users[existingIndex] = user;
+    } else {
+      users.push(user);
+    }
+    await AsyncStorage.setItem(REGISTERED_USERS_KEY, JSON.stringify(users));
+  } catch (error) {
+    console.error('Error saving registered user:', error);
+  }
+};
+
+/**
+ * Verifica si un número de teléfono está registrado
+ */
+export const isPhoneRegistered = async (phone: string): Promise<{ 
+  isRegistered: boolean; 
+  user?: RegisteredUser;
+  isOwner: boolean;
+}> => {
+  const formattedPhone = formatPhoneNumber(phone);
+  
+  // Los propietarios siempre tienen acceso (pueden hacer login sin registro previo)
+  if (isOwnerPhone(formattedPhone)) {
+    return { isRegistered: true, isOwner: true };
+  }
+  
+  const users = await getRegisteredUsers();
+  const user = users.find(u => u.phone === formattedPhone);
+  
+  return { 
+    isRegistered: !!user, 
+    user: user || undefined,
+    isOwner: false,
+  };
+};
+
+// ============================================================================
 // FUNCIONES DE AUTENTICACIÓN
 // ============================================================================
 
 /**
  * Envía un código OTP al número de teléfono proporcionado
+ * @param phoneNumber - Número de teléfono
+ * @param isLoginAttempt - Si es true, verifica que el usuario esté registrado primero
  */
-export const sendOTP = async (phoneNumber: string): Promise<AuthResult> => {
+export const sendOTP = async (
+  phoneNumber: string, 
+  isLoginAttempt: boolean = false
+): Promise<AuthResult & { isOwner?: boolean }> => {
   try {
     const formattedPhone = formatPhoneNumber(phoneNumber);
+    
+    // Si es un intento de login, verificar que el usuario esté registrado
+    if (isLoginAttempt) {
+      const { isRegistered, isOwner } = await isPhoneRegistered(formattedPhone);
+      
+      // Los propietarios siempre pueden hacer login
+      if (!isRegistered && !isOwner) {
+        return {
+          success: false,
+          message: '¡Hey! No eres un usuario autorizado.',
+          error: 'NOT_REGISTERED',
+        };
+      }
+    }
     
     // Crear la autenticación básica para Twilio
     const credentials = btoa(`${TWILIO_CONFIG.ACCOUNT_SID}:${TWILIO_CONFIG.AUTH_TOKEN}`);
@@ -204,6 +300,7 @@ export const sendOTP = async (phoneNumber: string): Promise<AuthResult> => {
       return {
         success: true,
         message: 'Código enviado exitosamente',
+        isOwner: isOwnerPhone(formattedPhone),
       };
     } else {
       return {
@@ -214,6 +311,64 @@ export const sendOTP = async (phoneNumber: string): Promise<AuthResult> => {
     }
   } catch (error) {
     console.error('Error sending OTP:', error);
+    return {
+      success: false,
+      message: 'Error de conexión',
+      error: error instanceof Error ? error.message : 'Error desconocido',
+    };
+  }
+};
+
+/**
+ * Envía OTP para registro de nuevo usuario (no verifica si está registrado)
+ */
+export const sendOTPForRegistration = async (phoneNumber: string): Promise<AuthResult & { isOwner?: boolean }> => {
+  try {
+    const formattedPhone = formatPhoneNumber(phoneNumber);
+    
+    // Verificar si ya está registrado
+    const { isRegistered, isOwner } = await isPhoneRegistered(formattedPhone);
+    
+    if (isRegistered && !isOwner) {
+      return {
+        success: false,
+        message: 'Este número ya está registrado. Por favor, inicia sesión.',
+        error: 'ALREADY_REGISTERED',
+      };
+    }
+    
+    // Crear la autenticación básica para Twilio
+    const credentials = btoa(`${TWILIO_CONFIG.ACCOUNT_SID}:${TWILIO_CONFIG.AUTH_TOKEN}`);
+    
+    const response = await fetch(
+      `https://verify.twilio.com/v2/Services/${TWILIO_CONFIG.VERIFY_SERVICE_SID}/Verifications`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Basic ${credentials}`,
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `To=${encodeURIComponent(formattedPhone)}&Channel=sms`,
+      }
+    );
+    
+    const data = await response.json();
+    
+    if (response.ok && data.status === 'pending') {
+      return {
+        success: true,
+        message: 'Código enviado exitosamente',
+        isOwner: isOwnerPhone(formattedPhone),
+      };
+    } else {
+      return {
+        success: false,
+        message: 'Error al enviar el código',
+        error: data.message || 'Error desconocido',
+      };
+    }
+  } catch (error) {
+    console.error('Error sending OTP for registration:', error);
     return {
       success: false,
       message: 'Error de conexión',
@@ -257,13 +412,8 @@ export const verifyOTP = async (
       const authToken = `${formattedPhone}_${currentDeviceId}_${Date.now()}`;
       
       // Verificar si es un usuario existente
-      const existingPhone = await AsyncStorage.getItem(STORAGE_KEYS.USER_PHONE);
-      const existingName = await AsyncStorage.getItem(STORAGE_KEYS.USER_NAME);
-      const isRegistered = await AsyncStorage.getItem(STORAGE_KEYS.IS_REGISTERED);
-      const isNewUser = existingPhone !== formattedPhone || isRegistered !== 'true';
-      
-      // Verificar si es propietario
-      const ownerStatus = isOwnerPhone(formattedPhone);
+      const { isRegistered, user, isOwner: ownerStatus } = await isPhoneRegistered(formattedPhone);
+      const isNewUser = !isRegistered && !ownerStatus;
       
       // Guardar la sesión
       await AsyncStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, authToken);
@@ -272,9 +422,16 @@ export const verifyOTP = async (
       await AsyncStorage.setItem(STORAGE_KEYS.REMEMBER_ME, rememberMe.toString());
       await AsyncStorage.setItem(STORAGE_KEYS.IS_OWNER, ownerStatus.toString());
       
+      // Si es usuario existente, cargar su nombre
+      if (user) {
+        await AsyncStorage.setItem(STORAGE_KEYS.USER_NAME, user.name);
+        await AsyncStorage.setItem(STORAGE_KEYS.IS_REGISTERED, 'true');
+      }
+      
       // Si es propietario, dar suscripción permanente
       if (ownerStatus) {
         await AsyncStorage.setItem(STORAGE_KEYS.SUBSCRIPTION_STATUS, 'active');
+        await AsyncStorage.setItem(STORAGE_KEYS.IS_REGISTERED, 'true');
         // Fecha muy lejana para propietarios
         await AsyncStorage.setItem(STORAGE_KEYS.SUBSCRIPTION_EXPIRY, (Date.now() + 100 * 365 * 24 * 60 * 60 * 1000).toString());
       }
@@ -284,7 +441,7 @@ export const verifyOTP = async (
         message: ownerStatus ? '¡Bienvenido, propietario!' : 'Verificación exitosa',
         isNewUser,
         isOwner: ownerStatus,
-        userName: existingName || undefined,
+        userName: user?.name || undefined,
       };
     } else {
       return {
@@ -339,6 +496,14 @@ export const registerUser = async (
     
     // Verificar si es propietario
     const ownerStatus = isOwnerPhone(phone);
+    
+    // Guardar en la lista de usuarios registrados
+    await saveRegisteredUser({
+      phone,
+      name: name.trim(),
+      registeredAt: Date.now(),
+      isOwner: ownerStatus,
+    });
     
     // Si no es propietario, iniciar período de prueba o requerir suscripción
     if (!ownerStatus) {
@@ -550,6 +715,7 @@ export const checkSubscription = async (): Promise<{
 
 export default {
   sendOTP,
+  sendOTPForRegistration,
   verifyOTP,
   registerUser,
   checkSession,
@@ -560,5 +726,6 @@ export default {
   getCurrentUserName,
   getCurrentDeviceId,
   isOwnerPhone,
+  isPhoneRegistered,
   checkSubscription,
 };

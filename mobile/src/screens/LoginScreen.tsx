@@ -3,6 +3,7 @@
  * Propiedad de Chyrris Technologies Inc.
  * 
  * Pantalla para ingresar número de teléfono y solicitar OTP
+ * Solo para usuarios ya registrados
  */
 
 import React, { useState } from 'react';
@@ -17,15 +18,16 @@ import {
   Image,
   ActivityIndicator,
   Switch,
+  Modal,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { sendOTP } from '../services/authService';
-import { TRANSLATIONS, Language } from '../i18n/translations';
+import { Language } from '../i18n/translations';
 
 // Traducciones específicas para la pantalla de login
 const LOGIN_TRANSLATIONS = {
   es: {
-    title: 'Bienvenido',
+    title: 'Iniciar Sesión',
     subtitle: 'Ingresa tu número de teléfono para continuar',
     phoneLabel: 'Número de Teléfono',
     phonePlaceholder: '+1 (555) 123-4567',
@@ -37,9 +39,16 @@ const LOGIN_TRANSLATIONS = {
     and: 'y',
     errorInvalidPhone: 'Por favor ingresa un número de teléfono válido',
     errorSendFailed: 'Error al enviar el código. Intenta de nuevo.',
+    noAccount: '¿No tienes cuenta?',
+    registerLink: 'Regístrate aquí',
+    // Mensaje de error para usuarios no registrados
+    notRegisteredTitle: '¡Hey, primo!',
+    notRegisteredMessage: 'No eres un usuario autorizado. Registra tu cuenta para acceder a la calculadora.',
+    notRegisteredButton: 'Registrarme',
+    notRegisteredCancel: 'Cancelar',
   },
   en: {
-    title: 'Welcome',
+    title: 'Sign In',
     subtitle: 'Enter your phone number to continue',
     phoneLabel: 'Phone Number',
     phonePlaceholder: '+1 (555) 123-4567',
@@ -51,6 +60,13 @@ const LOGIN_TRANSLATIONS = {
     and: 'and',
     errorInvalidPhone: 'Please enter a valid phone number',
     errorSendFailed: 'Failed to send code. Please try again.',
+    noAccount: "Don't have an account?",
+    registerLink: 'Register here',
+    // Error message for unregistered users
+    notRegisteredTitle: 'Hey there!',
+    notRegisteredMessage: "You're not an authorized user. Register your account to access the calculator.",
+    notRegisteredButton: 'Register Now',
+    notRegisteredCancel: 'Cancel',
   },
 };
 
@@ -58,6 +74,7 @@ interface LoginScreenProps {
   onOTPSent: (phone: string) => void;
   onShowTerms: () => void;
   onShowPrivacy: () => void;
+  onGoToRegister: () => void;
   language: Language;
   onChangeLanguage: (lang: Language) => void;
 }
@@ -66,12 +83,14 @@ export default function LoginScreen({
   onOTPSent,
   onShowTerms,
   onShowPrivacy,
+  onGoToRegister,
   language,
   onChangeLanguage,
 }: LoginScreenProps) {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showNotRegisteredModal, setShowNotRegisteredModal] = useState(false);
 
   const t = LOGIN_TRANSLATIONS[language];
 
@@ -98,10 +117,14 @@ export default function LoginScreen({
     setError(null);
 
     try {
-      const result = await sendOTP(phoneNumber);
+      // Enviar OTP con verificación de usuario registrado (isLoginAttempt = true)
+      const result = await sendOTP(phoneNumber, true);
       
       if (result.success) {
         onOTPSent(phoneNumber);
+      } else if (result.error === 'NOT_REGISTERED') {
+        // Usuario no registrado - mostrar modal
+        setShowNotRegisteredModal(true);
       } else {
         setError(result.error || t.errorSendFailed);
       }
@@ -114,6 +137,11 @@ export default function LoginScreen({
 
   const handleLanguageToggle = () => {
     onChangeLanguage(language === 'es' ? 'en' : 'es');
+  };
+
+  const handleGoToRegister = () => {
+    setShowNotRegisteredModal(false);
+    onGoToRegister();
   };
 
   return (
@@ -189,6 +217,14 @@ export default function LoginScreen({
           )}
         </TouchableOpacity>
 
+        {/* Enlace a registro */}
+        <View style={styles.registerContainer}>
+          <Text style={styles.registerText}>{t.noAccount} </Text>
+          <TouchableOpacity onPress={onGoToRegister}>
+            <Text style={styles.registerLink}>{t.registerLink}</Text>
+          </TouchableOpacity>
+        </View>
+
         {/* Términos y privacidad */}
         <View style={styles.termsContainer}>
           <Text style={styles.termsText}>{t.termsText}</Text>
@@ -208,6 +244,36 @@ export default function LoginScreen({
       <View style={styles.footer}>
         <Text style={styles.footerText}>© 2026 Chyrris Technologies</Text>
       </View>
+
+      {/* Modal de usuario no registrado */}
+      <Modal
+        visible={showNotRegisteredModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowNotRegisteredModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalEmoji}>🚫</Text>
+            <Text style={styles.modalTitle}>{t.notRegisteredTitle}</Text>
+            <Text style={styles.modalMessage}>{t.notRegisteredMessage}</Text>
+            
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={handleGoToRegister}
+            >
+              <Text style={styles.modalButtonText}>{t.notRegisteredButton}</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              style={styles.modalCancelButton}
+              onPress={() => setShowNotRegisteredModal(false)}
+            >
+              <Text style={styles.modalCancelText}>{t.notRegisteredCancel}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </KeyboardAvoidingView>
   );
 }
@@ -297,7 +363,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 18,
     alignItems: 'center',
-    marginBottom: 30,
+    marginBottom: 20,
   },
   buttonDisabled: {
     backgroundColor: '#1e3a5f',
@@ -311,6 +377,22 @@ const styles = StyleSheet.create({
     color: '#000',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  registerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 30,
+  },
+  registerText: {
+    color: '#8892b0',
+    fontSize: 14,
+  },
+  registerLink: {
+    color: '#00d4ff',
+    fontSize: 14,
+    fontWeight: 'bold',
+    textDecorationLine: 'underline',
   },
   termsContainer: {
     alignItems: 'center',
@@ -337,5 +419,62 @@ const styles = StyleSheet.create({
   footerText: {
     color: '#5a6a8a',
     fontSize: 12,
+  },
+  // Estilos del modal
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalContent: {
+    backgroundColor: '#112240',
+    borderRadius: 20,
+    padding: 30,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#ff6b6b',
+    maxWidth: 350,
+    width: '100%',
+  },
+  modalEmoji: {
+    fontSize: 60,
+    marginBottom: 15,
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#ff6b6b',
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  modalMessage: {
+    fontSize: 16,
+    color: '#8892b0',
+    textAlign: 'center',
+    marginBottom: 25,
+    lineHeight: 24,
+  },
+  modalButton: {
+    backgroundColor: '#00d4ff',
+    borderRadius: 12,
+    paddingVertical: 15,
+    paddingHorizontal: 40,
+    marginBottom: 15,
+    width: '100%',
+  },
+  modalButtonText: {
+    color: '#000',
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  modalCancelButton: {
+    paddingVertical: 10,
+  },
+  modalCancelText: {
+    color: '#5a6a8a',
+    fontSize: 14,
   },
 });
