@@ -18,17 +18,11 @@ import * as Application from 'expo-application';
 import { Platform } from 'react-native';
 
 // ============================================================================
-// CONFIGURACIÓN DE TWILIO
+// CONFIGURACIÓN DE API BACKEND
 // ============================================================================
 
-// Las credenciales se cargan desde variables de entorno
-// En desarrollo: crear archivo .env basado en .env.example
-// En producción: configurar en el servicio de hosting (EAS, Vercel, etc.)
-const TWILIO_CONFIG = {
-  ACCOUNT_SID: process.env.EXPO_PUBLIC_TWILIO_ACCOUNT_SID || '',
-  AUTH_TOKEN: process.env.EXPO_PUBLIC_TWILIO_AUTH_TOKEN || '',
-  VERIFY_SERVICE_SID: process.env.EXPO_PUBLIC_TWILIO_VERIFY_SERVICE_SID || '',
-};
+// URL del backend de Chyrris que maneja los OTPs de forma segura
+const API_BASE_URL = 'https://chyrris.com/api';
 
 // ============================================================================
 // CONFIGURACIÓN DE PROPIETARIO
@@ -279,24 +273,18 @@ export const sendOTP = async (
       }
     }
     
-    // Crear la autenticación básica para Twilio
-    const credentials = btoa(`${TWILIO_CONFIG.ACCOUNT_SID}:${TWILIO_CONFIG.AUTH_TOKEN}`);
-    
-    const response = await fetch(
-      `https://verify.twilio.com/v2/Services/${TWILIO_CONFIG.VERIFY_SERVICE_SID}/Verifications`,
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Basic ${credentials}`,
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: `To=${encodeURIComponent(formattedPhone)}&Channel=sms`,
-      }
-    );
+    // Llamar al backend de Chyrris para enviar el OTP
+    const response = await fetch(`${API_BASE_URL}/otp/send`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ phoneNumber: formattedPhone }),
+    });
     
     const data = await response.json();
     
-    if (response.ok && data.status === 'pending') {
+    if (data.success) {
       return {
         success: true,
         message: 'Código enviado exitosamente',
@@ -305,8 +293,8 @@ export const sendOTP = async (
     } else {
       return {
         success: false,
-        message: 'Error al enviar el código',
-        error: data.message || 'Error desconocido',
+        message: data.message || 'Error al enviar el código',
+        error: data.error || 'Error desconocido',
       };
     }
   } catch (error) {
@@ -337,24 +325,18 @@ export const sendOTPForRegistration = async (phoneNumber: string): Promise<AuthR
       };
     }
     
-    // Crear la autenticación básica para Twilio
-    const credentials = btoa(`${TWILIO_CONFIG.ACCOUNT_SID}:${TWILIO_CONFIG.AUTH_TOKEN}`);
-    
-    const response = await fetch(
-      `https://verify.twilio.com/v2/Services/${TWILIO_CONFIG.VERIFY_SERVICE_SID}/Verifications`,
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Basic ${credentials}`,
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: `To=${encodeURIComponent(formattedPhone)}&Channel=sms`,
-      }
-    );
+    // Llamar al backend de Chyrris para enviar el OTP
+    const response = await fetch(`${API_BASE_URL}/otp/send`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ phoneNumber: formattedPhone }),
+    });
     
     const data = await response.json();
     
-    if (response.ok && data.status === 'pending') {
+    if (data.success) {
       return {
         success: true,
         message: 'Código enviado exitosamente',
@@ -363,8 +345,8 @@ export const sendOTPForRegistration = async (phoneNumber: string): Promise<AuthR
     } else {
       return {
         success: false,
-        message: 'Error al enviar el código',
-        error: data.message || 'Error desconocido',
+        message: data.message || 'Error al enviar el código',
+        error: data.error || 'Error desconocido',
       };
     }
   } catch (error) {
@@ -389,24 +371,18 @@ export const verifyOTP = async (
     const formattedPhone = formatPhoneNumber(phoneNumber);
     const currentDeviceId = await getOrCreateDeviceId();
     
-    // Crear la autenticación básica para Twilio
-    const credentials = btoa(`${TWILIO_CONFIG.ACCOUNT_SID}:${TWILIO_CONFIG.AUTH_TOKEN}`);
-    
-    const response = await fetch(
-      `https://verify.twilio.com/v2/Services/${TWILIO_CONFIG.VERIFY_SERVICE_SID}/VerificationCheck`,
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Basic ${credentials}`,
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: `To=${encodeURIComponent(formattedPhone)}&Code=${code}`,
-      }
-    );
+    // Llamar al backend de Chyrris para verificar el OTP
+    const response = await fetch(`${API_BASE_URL}/otp/verify`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ phoneNumber: formattedPhone, code }),
+    });
     
     const data = await response.json();
     
-    if (response.ok && data.status === 'approved') {
+    if (data.success) {
       // Código verificado exitosamente
       const expiryTime = Date.now() + SESSION_DURATION_MS;
       const authToken = `${formattedPhone}_${currentDeviceId}_${Date.now()}`;
