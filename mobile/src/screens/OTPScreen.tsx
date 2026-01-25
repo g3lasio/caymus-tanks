@@ -175,7 +175,12 @@ export default function OTPScreen({
           userName: result.userName,
         });
       } else {
-        setError(result.error || t.errorVerifyFailed);
+        // Manejar error de dispositivo no autorizado específicamente
+        if (result.deviceMismatch) {
+          setError(t.errorDeviceMismatch);
+        } else {
+          setError(result.error || t.errorVerifyFailed);
+        }
         setCode(['', '', '', '', '', '']);
         inputRefs.current[0]?.focus();
       }

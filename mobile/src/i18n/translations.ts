@@ -70,6 +70,9 @@ export interface Translations {
   selectTankFirst: string;
   invalidInches: string;
   invalidGallons: string;
+  errorDeviceMismatch: string;
+  errorInvalidCode: string;
+  errorVerifyFailed: string;
   
   // Footer
   allRightsReserved: string;
@@ -142,6 +145,9 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     selectTankFirst: 'Por favor selecciona un tanque primero',
     invalidInches: 'Por favor ingresa un número válido de pulgadas',
     invalidGallons: 'Por favor ingresa un número válido de galones entre 0 y',
+    errorDeviceMismatch: 'Dispositivo no autorizado. Esta cuenta ya está vinculada a otro dispositivo. El uso compartido puede resultar en el bloqueo permanente.',
+    errorInvalidCode: 'Código inválido. Por favor ingresa los 6 dígitos.',
+    errorVerifyFailed: 'Error al verificar el código. Inténtalo de nuevo.',
     
     // Footer
     allRightsReserved: 'Todos los derechos reservados',
@@ -212,6 +218,9 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     selectTankFirst: 'Please select a tank first',
     invalidInches: 'Please enter a valid number of inches',
     invalidGallons: 'Please enter a valid number of gallons between 0 and',
+    errorDeviceMismatch: 'Unauthorized device. This account is already linked to another device. Account sharing may result in a permanent ban.',
+    errorInvalidCode: 'Invalid code. Please enter all 6 digits.',
+    errorVerifyFailed: 'Failed to verify code. Please try again.',
     
     // Footer
     allRightsReserved: 'All rights reserved',
@@ -256,8 +265,8 @@ El Usuario se compromete a:
 • Esta aplicación NO tiene afiliación con Caymus Vineyards ni con Wagner Family of Wine
 • Los datos de tanques son información propietaria de Chyrris Technologies Inc.
 
-5. RESTRICCIÓN DE DISPOSITIVO
-El Usuario acepta que su cuenta está vinculada a un único dispositivo. El uso compartido de cuentas está estrictamente prohibido.
+	5. RESTRICCIÓN DE DISPOSITIVO ÚNICO
+	Por motivos de seguridad y protección de datos, cada cuenta de usuario está vinculada a un único dispositivo físico. El intento de acceder desde múltiples dispositivos o compartir credenciales resultará en el bloqueo permanente de la cuenta. El sistema monitorea activamente los identificadores de dispositivo para prevenir el uso no autorizado.
 
 6. DURACIÓN
 Este acuerdo permanece vigente mientras el Usuario tenga acceso a la aplicación y por un período de 5 años después de la terminación del acceso.
@@ -442,8 +451,8 @@ The User agrees to:
 • This application is NOT affiliated with Caymus Vineyards or Wagner Family of Wine
 • Tank data is proprietary information of Chyrris Technologies Inc.
 
-5. DEVICE RESTRICTION
-The User accepts that their account is linked to a single device. Account sharing is strictly prohibited.
+	5. SINGLE DEVICE RESTRICTION
+	For security and data protection reasons, each user account is linked to a single physical device. Attempting to access from multiple devices or sharing credentials will result in a permanent account ban. The system actively monitors device identifiers to prevent unauthorized use.
 
 6. DURATION
 This agreement remains in effect while the User has access to the application and for a period of 5 years after termination of access.

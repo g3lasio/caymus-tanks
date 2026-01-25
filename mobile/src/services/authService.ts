@@ -102,6 +102,7 @@ export interface RegisteredUser {
   name: string;
   registeredAt: number;
   isOwner: boolean;
+  deviceId?: string; // ID del dispositivo vinculado
 }
 
 // ============================================================================
@@ -390,6 +391,17 @@ export const verifyOTP = async (
       // Verificar si es un usuario existente
       const { isRegistered, user, isOwner: ownerStatus } = await isPhoneRegistered(formattedPhone);
       const isNewUser = !isRegistered && !ownerStatus;
+
+      // RESTRICCIÓN DE DISPOSITIVO ÚNICO
+      // Si el usuario ya está registrado y tiene un deviceId vinculado, debe coincidir
+      if (user && user.deviceId && user.deviceId !== currentDeviceId && !ownerStatus) {
+        return {
+          success: false,
+          message: 'Dispositivo no autorizado',
+          error: 'Este usuario ya está vinculado a otro dispositivo. Por seguridad, solo se permite un dispositivo por cuenta. El uso compartido de cuentas puede resultar en el bloqueo permanente.',
+          deviceMismatch: true,
+        };
+      }
       
       // Guardar la sesión
       await AsyncStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, authToken);
@@ -473,12 +485,16 @@ export const registerUser = async (
     // Verificar si es propietario
     const ownerStatus = isOwnerPhone(phone);
     
+    // Obtener el deviceId actual para vincularlo
+    const currentDeviceId = await getOrCreateDeviceId();
+
     // Guardar en la lista de usuarios registrados
     await saveRegisteredUser({
       phone,
       name: name.trim(),
       registeredAt: Date.now(),
       isOwner: ownerStatus,
+      deviceId: currentDeviceId, // Vincular el dispositivo en el registro inicial
     });
     
     // Si no es propietario, marcar como pendiente de suscripción

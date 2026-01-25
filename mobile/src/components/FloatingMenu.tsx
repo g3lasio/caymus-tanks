@@ -266,18 +266,20 @@ export default function FloatingMenu({
               </View>
             )}
 
-            {/* INFORMACIÓN LEGAL (Menos visible, al final) */}
-            <TouchableOpacity style={styles.legalInfoButton} onPress={() => openPage('privacy')}>
-              <Text style={styles.legalInfoText}>{t.privacy}</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.legalInfoButton} onPress={() => openPage('legal')}>
-              <Text style={styles.legalInfoText}>{t.legal}</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.legalInfoButton} onPress={() => openPage('help')}>
-              <Text style={styles.legalInfoText}>{t.help}</Text>
-            </TouchableOpacity>
+            {/* INFORMACIÓN LEGAL (Compacta y discreta) */}
+            <View style={styles.legalFooter}>
+              <TouchableOpacity onPress={() => openPage('privacy')}>
+                <Text style={styles.legalFooterText}>{t.privacy}</Text>
+              </TouchableOpacity>
+              <Text style={styles.legalSeparator}>•</Text>
+              <TouchableOpacity onPress={() => openPage('legal')}>
+                <Text style={styles.legalFooterText}>{t.legal}</Text>
+              </TouchableOpacity>
+              <Text style={styles.legalSeparator}>•</Text>
+              <TouchableOpacity onPress={() => openPage('help')}>
+                <Text style={styles.legalFooterText}>{t.help}</Text>
+              </TouchableOpacity>
+            </View>
 
             <View style={styles.menuDivider} />
 
@@ -422,17 +424,22 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginTop: 2,
   },
-  legalInfoButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    marginBottom: 4,
-    backgroundColor: 'transparent',
+  legalFooter: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 10,
+    flexWrap: 'wrap',
   },
-  legalInfoText: {
-    fontSize: 12,
+  legalFooterText: {
+    fontSize: 11,
     color: '#8892b0',
-    textAlign: 'center',
     textDecorationLine: 'underline',
+  },
+  legalSeparator: {
+    color: '#444',
+    marginHorizontal: 6,
+    fontSize: 10,
   },
   languageToggleContainer: {
     flexDirection: 'row',
