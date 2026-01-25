@@ -64,7 +64,7 @@ export default function FloatingMenu({
 
   const openPage = (page: PageType) => {
     setCurrentPage(page);
-    onClose();
+    // No cerramos el sidebar aquí, se cierra cuando el usuario cierra la página
   };
 
   const closePage = () => {
@@ -237,33 +237,15 @@ export default function FloatingMenu({
           >
             <Text style={styles.menuTitle}>{t.menu}</Text>
             
+            {/* FEATURES PRINCIPALES (Visibles y prominentes) */}
             <TouchableOpacity style={styles.menuItem} onPress={() => openPage('history')}>
               <Text style={styles.menuItemIcon}>📋</Text>
               <Text style={styles.menuItemText}>{t.history}</Text>
             </TouchableOpacity>
 
-            <View style={styles.menuDivider} />
-
             <TouchableOpacity style={styles.menuItem} onPress={() => openPage('nda')}>
               <Text style={styles.menuItemIcon}>📜</Text>
               <Text style={styles.menuItemText}>{t.nda}</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.menuItem} onPress={() => openPage('privacy')}>
-              <Text style={styles.menuItemIcon}>🔒</Text>
-              <Text style={styles.menuItemText}>{t.privacy}</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.menuItem} onPress={() => openPage('legal')}>
-              <Text style={styles.menuItemIcon}>⚖️</Text>
-              <Text style={styles.menuItemText}>{t.legal}</Text>
-            </TouchableOpacity>
-
-            <View style={styles.menuDivider} />
-
-            <TouchableOpacity style={styles.menuItem} onPress={() => openPage('help')}>
-              <Text style={styles.menuItemIcon}>❓</Text>
-              <Text style={styles.menuItemText}>{t.help}</Text>
             </TouchableOpacity>
 
             {/* Spacer para empujar elementos al fondo */}
@@ -283,6 +265,21 @@ export default function FloatingMenu({
                 </View>
               </View>
             )}
+
+            {/* INFORMACIÓN LEGAL (Menos visible, al final) */}
+            <TouchableOpacity style={styles.legalInfoButton} onPress={() => openPage('privacy')}>
+              <Text style={styles.legalInfoText}>{t.privacy}</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.legalInfoButton} onPress={() => openPage('legal')}>
+              <Text style={styles.legalInfoText}>{t.legal}</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.legalInfoButton} onPress={() => openPage('help')}>
+              <Text style={styles.legalInfoText}>{t.help}</Text>
+            </TouchableOpacity>
+
+            <View style={styles.menuDivider} />
 
             {/* Toggle de idioma al final */}
             <View style={styles.languageToggleContainer}>
@@ -424,6 +421,18 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: 'bold',
     marginTop: 2,
+  },
+  legalInfoButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    marginBottom: 4,
+    backgroundColor: 'transparent',
+  },
+  legalInfoText: {
+    fontSize: 12,
+    color: '#8892b0',
+    textAlign: 'center',
+    textDecorationLine: 'underline',
   },
   languageToggleContainer: {
     flexDirection: 'row',
