@@ -25,7 +25,7 @@ import { Language } from '../i18n/translations';
 const OTP_TRANSLATIONS = {
   es: {
     title: 'Verificación',
-    subtitle: 'Ingresa el código de 4 dígitos enviado a',
+    subtitle: 'Ingresa el código de 6 dígitos enviado a',
     verifyButton: 'Verificar',
     verifying: 'Verificando...',
     resendCode: '¿No recibiste el código?',
@@ -33,14 +33,14 @@ const OTP_TRANSLATIONS = {
     resending: 'Reenviando...',
     codeSent: '¡Código reenviado!',
     changeNumber: 'Cambiar número',
-    errorInvalidCode: 'Por favor ingresa el código completo de 4 dígitos',
+    errorInvalidCode: 'Por favor ingresa el código completo de 6 dígitos',
     errorVerifyFailed: 'Código incorrecto. Intenta de nuevo.',
     errorResendFailed: 'Error al reenviar. Intenta de nuevo.',
     waitToResend: 'Espera {seconds}s para reenviar',
   },
   en: {
     title: 'Verification',
-    subtitle: 'Enter the 4-digit code sent to',
+    subtitle: 'Enter the 6-digit code sent to',
     verifyButton: 'Verify',
     verifying: 'Verifying...',
     resendCode: "Didn't receive the code?",
@@ -48,7 +48,7 @@ const OTP_TRANSLATIONS = {
     resending: 'Resending...',
     codeSent: 'Code sent!',
     changeNumber: 'Change number',
-    errorInvalidCode: 'Please enter the complete 4-digit code',
+    errorInvalidCode: 'Please enter the complete 6-digit code',
     errorVerifyFailed: 'Incorrect code. Please try again.',
     errorResendFailed: 'Failed to resend. Please try again.',
     waitToResend: 'Wait {seconds}s to resend',
@@ -68,7 +68,7 @@ export default function OTPScreen({
   onChangeNumber,
   language,
 }: OTPScreenProps) {
-  const [code, setCode] = useState(['', '', '', '']);
+  const [code, setCode] = useState(['', '', '', '', '', '']);
   const [isLoading, setIsLoading] = useState(false);
   const [isResending, setIsResending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -97,18 +97,18 @@ export default function OTPScreen({
   const handleCodeChange = (text: string, index: number) => {
     // Manejar pegado de código completo (Auto-fill)
     if (text.length > 1) {
-      const pastedCode = text.replace(/\D/g, '').slice(0, 4).split('');
-      const newCode = ['', '', '', ''];
+      const pastedCode = text.replace(/\D/g, '').slice(0, 6).split('');
+      const newCode = ['', '', '', '', '', ''];
       pastedCode.forEach((digit, i) => {
-        if (i < 4) newCode[i] = digit;
+        if (i < 6) newCode[i] = digit;
       });
       setCode(newCode);
       
       // Enfocar el último campo o el siguiente vacío
-      const nextIndex = Math.min(pastedCode.length, 3);
+      const nextIndex = Math.min(pastedCode.length, 5);
       inputRefs.current[nextIndex]?.focus();
       
-      if (pastedCode.length === 4) {
+      if (pastedCode.length === 6) {
         handleVerify(newCode.join(''));
       }
       return;
@@ -123,14 +123,14 @@ export default function OTPScreen({
     setSuccessMessage(null);
 
     // Auto-avanzar al siguiente input
-    if (digit && index < 3) {
+    if (digit && index < 5) {
       inputRefs.current[index + 1]?.focus();
     }
 
     // Auto-verificar cuando se completa el código
-    if (digit && index === 3) {
+    if (digit && index === 5) {
       const fullCode = newCode.join('');
-      if (fullCode.length === 4) {
+      if (fullCode.length === 6) {
         handleVerify(fullCode);
       }
     }
@@ -146,7 +146,7 @@ export default function OTPScreen({
   const handleVerify = async (codeToVerify?: string) => {
     const fullCode = codeToVerify || code.join('');
     
-    if (fullCode.length !== 4) {
+    if (fullCode.length !== 6) {
       setError(t.errorInvalidCode);
       return;
     }
@@ -165,7 +165,7 @@ export default function OTPScreen({
         });
       } else {
         setError(result.error || t.errorVerifyFailed);
-        setCode(['', '', '', '']);
+        setCode(['', '', '', '', '', '']);
         inputRefs.current[0]?.focus();
       }
     } catch (err) {
@@ -190,7 +190,7 @@ export default function OTPScreen({
       if (result.success) {
         setSuccessMessage(t.codeSent);
         setResendCountdown(60);
-        setCode(['', '', '', '']);
+        setCode(['', '', '', '', '', '']);
         inputRefs.current[0]?.focus();
       } else {
         setError(result.error || t.errorResendFailed);
@@ -244,7 +244,7 @@ export default function OTPScreen({
               onChangeText={(text) => handleCodeChange(text, index)}
               onKeyPress={(e) => handleKeyPress(e, index)}
               keyboardType="number-pad"
-              maxLength={Platform.OS === 'ios' ? 4 : 1}
+              maxLength={Platform.OS === 'ios' ? 6 : 1}
               selectTextOnFocus
               textContentType="oneTimeCode"
               autoComplete="one-time-code"

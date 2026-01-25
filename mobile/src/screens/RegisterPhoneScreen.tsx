@@ -44,7 +44,7 @@ const REGISTER_TRANSLATIONS = {
     loginLink: 'Inicia sesión',
     // Información de suscripción
     subscriptionTitle: 'Información de Suscripción',
-    subscriptionPrice: '$5.99/mes',
+    subscriptionPrice: '$7.00/mes',
     subscriptionCancel: 'Cancela cuando quieras',
     subscriptionAccess: 'Acceso inmediato a todas las funciones',
   },
@@ -66,7 +66,7 @@ const REGISTER_TRANSLATIONS = {
     loginLink: 'Sign in',
     // Subscription info
     subscriptionTitle: 'Subscription Information',
-    subscriptionPrice: '$5.99/month',
+    subscriptionPrice: '$7.00/month',
     subscriptionCancel: 'Cancel anytime',
     subscriptionAccess: 'Immediate access to all features',
   },
