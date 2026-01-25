@@ -104,12 +104,23 @@ export default function OTPScreen({
       });
       setCode(newCode);
       
+      // Limpiar todos los campos primero para forzar re-render
+      inputRefs.current.forEach((ref, i) => {
+        if (ref && i < pastedCode.length) {
+          ref.setNativeProps({ text: pastedCode[i] });
+        }
+      });
+      
       // Enfocar el último campo o el siguiente vacío
       const nextIndex = Math.min(pastedCode.length, 5);
-      inputRefs.current[nextIndex]?.focus();
+      setTimeout(() => {
+        inputRefs.current[nextIndex]?.focus();
+      }, 100);
       
       if (pastedCode.length === 6) {
-        handleVerify(newCode.join(''));
+        setTimeout(() => {
+          handleVerify(newCode.join(''));
+        }, 150);
       }
       return;
     }

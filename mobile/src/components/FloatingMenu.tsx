@@ -64,8 +64,7 @@ export default function FloatingMenu({
 
   const openPage = (page: PageType) => {
     setCurrentPage(page);
-    // No cerramos el menú principal aquí para evitar parpadeos, 
-    // el Modal de la página cubrirá todo.
+    onClose();
   };
 
   const closePage = () => {
@@ -74,8 +73,6 @@ export default function FloatingMenu({
     setFeedbackText('');
     setFeedbackEmail('');
     setFeedbackSubject('');
-    // Al cerrar una página interna, también cerramos el menú lateral
-    onClose();
   };
 
   const handleSendFeedback = () => {
@@ -233,7 +230,11 @@ export default function FloatingMenu({
           activeOpacity={1}
           onPress={onClose}
         >
-          <View style={styles.sidebarContainer} onStartShouldSetResponder={() => true}>
+          <TouchableOpacity
+            activeOpacity={1}
+            style={styles.sidebarContainer}
+            onPress={(e) => e.stopPropagation()}
+          >
             <Text style={styles.menuTitle}>{t.menu}</Text>
             
             <TouchableOpacity style={styles.menuItem} onPress={() => openPage('history')}>
@@ -306,7 +307,7 @@ export default function FloatingMenu({
             <TouchableOpacity style={styles.menuCloseButton} onPress={onClose}>
               <Text style={styles.menuCloseButtonText}>{t.close}</Text>
             </TouchableOpacity>
-          </View>
+          </TouchableOpacity>
         </TouchableOpacity>
       </Modal>
 
