@@ -145,11 +145,14 @@ export default function CalculatorScreen({
       timestamp: Date.now()
     };
     
+    // Asegurarnos de que el historial se actualice correctamente
     const filteredHistory = searchHistory.filter(item => item.tankId !== tankId);
     const updatedHistory = [newHistoryItem, ...filteredHistory].slice(0, 10);
     
     setSearchHistory(updatedHistory);
-    saveHistory(updatedHistory);
+    // Guardar inmediatamente en AsyncStorage
+    AsyncStorage.setItem('tankSearchHistory', JSON.stringify(updatedHistory))
+      .catch(e => console.error('Error saving history', e));
   };
 
   const handleSelectTank = (tankId: string) => {
@@ -540,12 +543,14 @@ const styles = StyleSheet.create({
     borderBottomColor: '#00d4ff',
   },
   menuButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 8,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     backgroundColor: '#00d4ff',
     justifyContent: 'center',
     alignItems: 'center',
+    // Aumentar área de toque para iOS
+    zIndex: 1000,
   },
   menuButtonText: {
     fontSize: 20,

@@ -64,7 +64,8 @@ export default function FloatingMenu({
 
   const openPage = (page: PageType) => {
     setCurrentPage(page);
-    onClose();
+    // No cerramos el menú principal aquí para evitar parpadeos, 
+    // el Modal de la página cubrirá todo.
   };
 
   const closePage = () => {
@@ -73,6 +74,8 @@ export default function FloatingMenu({
     setFeedbackText('');
     setFeedbackEmail('');
     setFeedbackSubject('');
+    // Al cerrar una página interna, también cerramos el menú lateral
+    onClose();
   };
 
   const handleSendFeedback = () => {
