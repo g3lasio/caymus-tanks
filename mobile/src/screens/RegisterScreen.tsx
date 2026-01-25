@@ -201,8 +201,8 @@ export default function RegisterScreen({
                 <View style={styles.subscriptionInfo}>
                   <Text style={styles.subscriptionText}>
                     {language === 'es' 
-                      ? '• Suscripción mensual: $7.00/mes'
-                      : '• Monthly subscription: $7.00/month'}
+                      ? '• Suscripción mensual: $6.99/mes'
+                      : '• Monthly subscription: $6.99/month'}
                   </Text>
                   <Text style={styles.subscriptionText}>
                     {language === 'es' 
