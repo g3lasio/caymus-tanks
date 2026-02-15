@@ -13,6 +13,7 @@ import LoginScreen from './screens/LoginScreen';
 import RegisterPhoneScreen from './screens/RegisterPhoneScreen';
 import OTPScreen from './screens/OTPScreen';
 import RegisterScreen from './screens/RegisterScreen';
+import PaywallScreen from './screens/PaywallScreen';
 import CalculatorScreen from './screens/CalculatorScreen';
 import { checkSession, logout, isOwnerPhone, SessionInfo } from './services/authService';
 import { Language, LEGAL_CONTENT } from './i18n/translations';
@@ -25,6 +26,7 @@ type AuthState =
   | 'otp_login'         // OTP para login
   | 'otp_register'      // OTP para registro
   | 'register_profile'  // Registro paso 2 (nombre y términos)
+  | 'paywall'           // Pantalla de pago/suscripción
   | 'authenticated';    // Usuario autenticado
 
 export default function App() {
@@ -148,6 +150,25 @@ export default function App() {
 
   const handleRegistered = (name: string) => {
     setUserName(name);
+    
+    // Si es propietario, ir directo a la app
+    if (isOwner) {
+      setShowWelcome(true);
+      setAuthState('authenticated');
+      
+      // Ocultar bienvenida después de 3 segundos
+      setTimeout(() => {
+        setShowWelcome(false);
+      }, 3000);
+    } else {
+      // Si no es propietario, mostrar paywall
+      setAuthState('paywall');
+    }
+  };
+
+  // === HANDLER PARA PAYWALL ===
+  
+  const handleSubscriptionActivated = () => {
     setShowWelcome(true);
     setAuthState('authenticated');
     
@@ -292,6 +313,16 @@ export default function App() {
         />
         {renderLegalModal()}
       </>
+    );
+  }
+
+  // Pantalla de Paywall (pago/suscripción)
+  if (authState === 'paywall') {
+    return (
+      <PaywallScreen
+        onSubscriptionActivated={handleSubscriptionActivated}
+        language={language}
+      />
     );
   }
 

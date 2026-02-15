@@ -263,7 +263,12 @@ export async function validateReceipt(
     // TODO: Implementar validación de recibo en el backend de chyrris
     // Endpoint sugerido: POST https://chyrris.com/api/subscription/validate
     
-    const response = await fetch('https://chyrris.com/api/subscription/validate', {
+    // Usar el backend de chyrris.com en producción
+    const API_URL = __DEV__ 
+      ? 'http://localhost:5000/api/subscription/validate'
+      : 'https://chyrris.com/api/subscription/validate';
+    
+    const response = await fetch(API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
