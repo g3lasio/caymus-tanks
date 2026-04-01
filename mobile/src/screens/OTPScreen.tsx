@@ -95,55 +95,65 @@ export default function OTPScreen({
   }, []);
 
   const handleCodeChange = (text: string, index: number) => {
-    // Manejar pegado de código completo (Auto-fill)
-    if (text.length > 1) {
-      const pastedCode = text.replace(/\D/g, '').slice(0, 6).split('');
+    // Limpiar caracteres no numéricos
+    const cleanText = text.replace(/\D/g, '');
+
+    // CASO: Pegado/Auto-fill de código completo (más de 1 dígito)
+    // iOS pega todos los dígitos en el primer campo con textContentType="oneTimeCode"
+    if (cleanText.length > 1) {
+      const digits = cleanText.slice(0, 6).split('');
       const newCode = ['', '', '', '', '', ''];
-      pastedCode.forEach((digit, i) => {
-        if (i < 6) newCode[i] = digit;
+      digits.forEach((digit, i) => {
+        newCode[i] = digit;
       });
       setCode(newCode);
-      
-      // Limpiar todos los campos primero para forzar re-render
-      inputRefs.current.forEach((ref, i) => {
-        if (ref && i < pastedCode.length) {
-          ref.setNativeProps({ text: pastedCode[i] });
-        }
-      });
-      
-      // Enfocar el último campo o el siguiente vacío
-      const nextIndex = Math.min(pastedCode.length, 5);
+      setError(null);
+
+      // Enfocar el último campo llenado
+      const lastFilledIndex = Math.min(digits.length - 1, 5);
       setTimeout(() => {
-        inputRefs.current[nextIndex]?.focus();
-      }, 100);
-      
-      if (pastedCode.length === 6) {
+        inputRefs.current[lastFilledIndex]?.focus();
+      }, 50);
+
+      // Auto-verificar si se llenaron los 6 dígitos
+      if (digits.length === 6) {
         setTimeout(() => {
           handleVerify(newCode.join(''));
-        }, 150);
+        }, 200);
       }
       return;
     }
 
-    // Manejar entrada de un solo dígito
-    const digit = text.replace(/\D/g, '').slice(-1);
-    const newCode = [...code];
-    newCode[index] = digit;
-    setCode(newCode);
-    setError(null);
-    setSuccessMessage(null);
+    // CASO: Ingreso de un solo dígito
+    if (cleanText.length === 1) {
+      const newCode = [...code];
+      newCode[index] = cleanText;
+      setCode(newCode);
+      setError(null);
+      setSuccessMessage(null);
 
-    // Auto-avanzar al siguiente input
-    if (digit && index < 5) {
-      inputRefs.current[index + 1]?.focus();
+      // Mover al siguiente campo
+      if (index < 5) {
+        setTimeout(() => {
+          inputRefs.current[index + 1]?.focus();
+        }, 50);
+      }
+
+      // Auto-verificar si se completaron los 6 dígitos
+      const fullCode = newCode.join('');
+      if (fullCode.length === 6 && !newCode.includes('')) {
+        setTimeout(() => {
+          handleVerify(fullCode);
+        }, 200);
+      }
+      return;
     }
 
-    // Auto-verificar cuando se completa el código
-    if (digit && index === 5) {
-      const fullCode = newCode.join('');
-      if (fullCode.length === 6) {
-        handleVerify(fullCode);
-      }
+    // CASO: Campo vacío (borrado)
+    if (cleanText.length === 0) {
+      const newCode = [...code];
+      newCode[index] = '';
+      setCode(newCode);
     }
   };
 
@@ -260,10 +270,10 @@ export default function OTPScreen({
               onChangeText={(text) => handleCodeChange(text, index)}
               onKeyPress={(e) => handleKeyPress(e, index)}
               keyboardType="number-pad"
-              maxLength={Platform.OS === 'ios' ? 6 : 1}
+              maxLength={index === 0 ? 6 : 1}
               selectTextOnFocus
-              textContentType="oneTimeCode"
-              autoComplete="one-time-code"
+              textContentType={index === 0 ? 'oneTimeCode' : 'none'}
+              autoComplete={index === 0 ? 'one-time-code' : 'off'}
             />
           ))}
         </View>

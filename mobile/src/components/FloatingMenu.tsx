@@ -98,8 +98,18 @@ export default function FloatingMenu({
     onChangeLanguage(language === 'es' ? 'en' : 'es');
   };
 
-  const handleLogout = () => {
+  // FIX: Resetear currentPage al cerrar el menú para que responda correctamente la segunda vez
+  const handleClose = () => {
+    setCurrentPage(null);
+    setFeedbackSent(false);
+    setFeedbackText('');
+    setFeedbackEmail('');
+    setFeedbackSubject('');
     onClose();
+  };
+
+  const handleLogout = () => {
+    handleClose();
     if (onLogout) {
       onLogout();
     }
@@ -132,7 +142,12 @@ export default function FloatingMenu({
             <Text style={styles.closeButtonText}>✕</Text>
           </TouchableOpacity>
         </View>
-        <ScrollView style={styles.pageContent}>
+        <ScrollView
+          style={styles.pageContent}
+          contentContainerStyle={{ paddingBottom: 40 }}
+          showsVerticalScrollIndicator={true}
+          bounces={true}
+        >
           {history.length === 0 ? (
             <Text style={styles.emptyText}>{t.noHistory}</Text>
           ) : (
@@ -228,7 +243,7 @@ export default function FloatingMenu({
         <TouchableOpacity
           style={styles.menuOverlay}
           activeOpacity={1}
-          onPress={onClose}
+          onPress={handleClose}
         >
           <TouchableOpacity
             activeOpacity={1}
@@ -303,7 +318,7 @@ export default function FloatingMenu({
               <Text style={styles.logoutText}>{t.logout}</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.menuCloseButton} onPress={onClose}>
+            <TouchableOpacity style={styles.menuCloseButton} onPress={handleClose}>
               <Text style={styles.menuCloseButtonText}>{t.close}</Text>
             </TouchableOpacity>
           </TouchableOpacity>

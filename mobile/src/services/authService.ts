@@ -388,17 +388,52 @@ export const verifyOTP = async (
       const expiryTime = Date.now() + SESSION_DURATION_MS;
       const authToken = `${formattedPhone}_${currentDeviceId}_${Date.now()}`;
       
-      // Verificar si es un usuario existente
-      const { isRegistered, user, isOwner: ownerStatus } = await isPhoneRegistered(formattedPhone);
-      const isNewUser = !isRegistered && !ownerStatus;
-
-      // RESTRICCIÓN DE DISPOSITIVO ÚNICO
-      // Si el usuario ya está registrado y tiene un deviceId vinculado, debe coincidir
-      if (user && user.deviceId && user.deviceId !== currentDeviceId && !ownerStatus) {
+      // FIX: Consultar el backend para obtener el perfil del usuario
+      // Esto resuelve el bug de que pide nombre en cada login cuando el usuario
+      // reinstala la app o usa otro dispositivo
+      let backendProfile: {
+        isRegistered: boolean;
+        isOwner: boolean;
+        userName: string | null;
+        subscriptionStatus: string;
+        subscriptionExpiry?: string;
+      } | null = null;
+      
+      try {
+        const profileResponse = await fetch(
+          `${API_BASE_URL}/users/profile?phone=${encodeURIComponent(formattedPhone)}`
+        );
+        if (profileResponse.ok) {
+          const profileData = await profileResponse.json();
+          if (profileData.success) {
+            backendProfile = profileData;
+          }
+        }
+      } catch (profileError) {
+        console.warn('No se pudo obtener perfil del backend, usando datos locales:', profileError);
+      }
+      
+      // Combinar datos del backend con datos locales (AsyncStorage)
+      const ownerStatus = backendProfile?.isOwner || isOwnerPhone(formattedPhone);
+      const isBackendRegistered = backendProfile?.isRegistered || false;
+      const backendUserName = backendProfile?.userName || null;
+      
+      // Verificar también en AsyncStorage local (fallback)
+      const { isRegistered: localRegistered, user: localUser } = await isPhoneRegistered(formattedPhone);
+      
+      // El usuario está registrado si el backend lo dice O si el local lo dice
+      const isRegistered = isBackendRegistered || localRegistered || ownerStatus;
+      const isNewUser = !isRegistered;
+      
+      // Nombre: preferir backend, luego local
+      const resolvedName = backendUserName || localUser?.name || null;
+      
+      // RESTRICCIÓN DE DISPOSITIVO ÚNCO (solo para usuarios sin datos en backend)
+      if (localUser && localUser.deviceId && localUser.deviceId !== currentDeviceId && !ownerStatus && !backendProfile?.isRegistered) {
         return {
           success: false,
           message: 'Dispositivo no autorizado',
-          error: 'Este usuario ya está vinculado a otro dispositivo. Por seguridad, solo se permite un dispositivo por cuenta. El uso compartido de cuentas puede resultar en el bloqueo permanente.',
+          error: 'Este usuario ya está vinculado a otro dispositivo. Por seguridad, solo se permite un dispositivo por cuenta.',
           deviceMismatch: true,
         };
       }
@@ -410,18 +445,30 @@ export const verifyOTP = async (
       await AsyncStorage.setItem(STORAGE_KEYS.REMEMBER_ME, rememberMe.toString());
       await AsyncStorage.setItem(STORAGE_KEYS.IS_OWNER, ownerStatus.toString());
       
-      // Si es usuario existente, cargar su nombre
-      if (user) {
-        await AsyncStorage.setItem(STORAGE_KEYS.USER_NAME, user.name);
+      // Guardar nombre y estado de registro
+      if (resolvedName) {
+        await AsyncStorage.setItem(STORAGE_KEYS.USER_NAME, resolvedName);
+      }
+      if (isRegistered) {
         await AsyncStorage.setItem(STORAGE_KEYS.IS_REGISTERED, 'true');
       }
       
-      // Si es propietario, dar suscripción permanente
+      // Suscripción
       if (ownerStatus) {
         await AsyncStorage.setItem(STORAGE_KEYS.SUBSCRIPTION_STATUS, 'active');
         await AsyncStorage.setItem(STORAGE_KEYS.IS_REGISTERED, 'true');
-        // Fecha muy lejana para propietarios
-        await AsyncStorage.setItem(STORAGE_KEYS.SUBSCRIPTION_EXPIRY, (Date.now() + 100 * 365 * 24 * 60 * 60 * 1000).toString());
+        await AsyncStorage.setItem(
+          STORAGE_KEYS.SUBSCRIPTION_EXPIRY,
+          (Date.now() + 100 * 365 * 24 * 60 * 60 * 1000).toString()
+        );
+      } else if (backendProfile?.subscriptionStatus === 'active') {
+        await AsyncStorage.setItem(STORAGE_KEYS.SUBSCRIPTION_STATUS, 'active');
+        if (backendProfile.subscriptionExpiry) {
+          await AsyncStorage.setItem(
+            STORAGE_KEYS.SUBSCRIPTION_EXPIRY,
+            new Date(backendProfile.subscriptionExpiry).getTime().toString()
+          );
+        }
       }
       
       return {
@@ -429,7 +476,7 @@ export const verifyOTP = async (
         message: ownerStatus ? '¡Bienvenido, propietario!' : 'Verificación exitosa',
         isNewUser,
         isOwner: ownerStatus,
-        userName: user?.name || undefined,
+        userName: resolvedName || undefined,
       };
     } else {
       return {
@@ -487,22 +534,36 @@ export const registerUser = async (
     
     // Obtener el deviceId actual para vincularlo
     const currentDeviceId = await getOrCreateDeviceId();
-
-    // Guardar en la lista de usuarios registrados
+    
+    // Guardar en la lista de usuarios registrados (local)
     await saveRegisteredUser({
       phone,
       name: name.trim(),
       registeredAt: Date.now(),
       isOwner: ownerStatus,
-      deviceId: currentDeviceId, // Vincular el dispositivo en el registro inicial
+      deviceId: currentDeviceId,
     });
     
+    // FIX: Guardar también en el backend para persistencia entre dispositivos
+    try {
+      await fetch(`${API_BASE_URL}/users/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          phone,
+          name: name.trim(),
+          acceptedTerms,
+        }),
+      });
+    } catch (backendError) {
+      // No bloquear el registro si el backend falla
+      console.warn('No se pudo guardar en el backend:', backendError);
+    }
+    
     // Si no es propietario, marcar como pendiente de suscripción
-    // No hay período de prueba - deben suscribirse para acceder
     if (!ownerStatus) {
       const existingStatus = await AsyncStorage.getItem(STORAGE_KEYS.SUBSCRIPTION_STATUS);
       if (!existingStatus) {
-        // Nuevo usuario: estado pendiente hasta que se suscriba
         await AsyncStorage.setItem(STORAGE_KEYS.SUBSCRIPTION_STATUS, 'pending');
       }
     }

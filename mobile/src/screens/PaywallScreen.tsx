@@ -1,10 +1,11 @@
 /**
  * Pantalla de Paywall - Caymus Tank Calculator
  * Propiedad de Chyrris Technologies Inc.
- * 
- * Muestra los planes de suscripción y maneja el proceso de compra
+ *
+ * FIX: Reemplazado el sistema IAP de Apple (que fallaba en App Store)
+ * por una redirección al sitio web chyrris.com/caymus-tanks/subscribe
+ * donde el usuario gestiona su suscripción via Stripe.
  */
-
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -14,20 +15,15 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
+  Linking,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
-import {
-  initializeIAP,
-  purchaseSubscription,
-  restorePurchases,
-  setPurchaseListener,
-  validateReceipt,
-  finishTransaction,
-  getSubscriptionProducts,
-} from '../services/subscriptionService';
-import type { InAppPurchase } from 'expo-in-app-purchases';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Language } from '../i18n/translations';
+
+// URL de la página de suscripción en el sitio web
+const SUBSCRIPTION_URL = 'https://chyrris.com/caymus-tanks/subscribe';
 
 interface PaywallScreenProps {
   onSubscriptionActivated: () => void;
@@ -39,9 +35,8 @@ export default function PaywallScreen({
   language,
 }: PaywallScreenProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [isInitializing, setIsInitializing] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [productPrice, setProductPrice] = useState<string>('$6.99');
+  const [userPhone, setUserPhone] = useState<string>('');
+  const [isCheckingStatus, setIsCheckingStatus] = useState(false);
 
   // Traducciones
   const t = {
@@ -53,19 +48,25 @@ export default function PaywallScreen({
       feature3: 'Soporte prioritario',
       feature4: 'Actualizaciones automáticas',
       feature5: 'Sin anuncios',
-      priceLabel: 'Suscripción mensual',
-      subscribeButton: 'Suscribirse ahora',
-      restoreButton: 'Restaurar compras',
-      cancelAnytime: 'Cancela cuando quieras',
+      feature6: 'Acceso a todos los modelos de tanques',
+      priceLabel: 'Suscripción Mensual',
+      price: '$6.99',
       autoRenew: 'Se renueva automáticamente cada mes',
-      termsNote: 'Al suscribirte, aceptas nuestros Términos de Servicio',
-      processingPayment: 'Procesando pago...',
-      validatingPurchase: 'Validando compra...',
+      cancelAnytime: 'Cancela cuando quieras',
+      subscribeButton: 'Suscribirse Ahora',
+      checkStatusButton: 'Ya me suscribí — Verificar',
+      howItWorks: '¿Cómo funciona?',
+      step1: '1. Toca "Suscribirse Ahora"',
+      step2: '2. Completa el pago en nuestro sitio web',
+      step3: '3. Regresa a la app y toca "Ya me suscribí"',
+      termsNote: 'Al suscribirte aceptas nuestros Términos de Servicio y Política de Privacidad.',
+      checkingStatus: 'Verificando suscripción...',
+      notActiveTitle: 'Suscripción no encontrada',
+      notActiveMessage: 'No encontramos una suscripción activa para tu número. Si ya te suscribiste, espera unos minutos y vuelve a intentarlo.',
+      activeTitle: '¡Suscripción Activa!',
+      activeMessage: 'Tu suscripción está activa. ¡Disfruta de Caymus Pro!',
       errorTitle: 'Error',
-      errorMessage: 'Hubo un problema con la compra. Intenta de nuevo.',
-      restoreSuccess: '¡Compras restauradas!',
-      restoreError: 'No se encontraron compras anteriores',
-      noProductsError: 'No se pudieron cargar los productos. Verifica tu conexión.',
+      errorMessage: 'No se pudo abrir el navegador. Visita chyrris.com/caymus-tanks/subscribe desde tu navegador.',
     },
     en: {
       title: 'Welcome to Caymus Pro!',
@@ -75,164 +76,122 @@ export default function PaywallScreen({
       feature3: 'Priority support',
       feature4: 'Automatic updates',
       feature5: 'No ads',
-      priceLabel: 'Monthly subscription',
-      subscribeButton: 'Subscribe now',
-      restoreButton: 'Restore purchases',
-      cancelAnytime: 'Cancel anytime',
+      feature6: 'Access to all tank models',
+      priceLabel: 'Monthly Subscription',
+      price: '$6.99',
       autoRenew: 'Automatically renews every month',
-      termsNote: 'By subscribing, you accept our Terms of Service',
-      processingPayment: 'Processing payment...',
-      validatingPurchase: 'Validating purchase...',
+      cancelAnytime: 'Cancel anytime',
+      subscribeButton: 'Subscribe Now',
+      checkStatusButton: 'I already subscribed — Verify',
+      howItWorks: 'How it works?',
+      step1: '1. Tap "Subscribe Now"',
+      step2: '2. Complete payment on our website',
+      step3: '3. Return to the app and tap "I already subscribed"',
+      termsNote: 'By subscribing you accept our Terms of Service and Privacy Policy.',
+      checkingStatus: 'Verifying subscription...',
+      notActiveTitle: 'Subscription not found',
+      notActiveMessage: 'We could not find an active subscription for your number. If you already subscribed, wait a few minutes and try again.',
+      activeTitle: 'Subscription Active!',
+      activeMessage: 'Your subscription is active. Enjoy Caymus Pro!',
       errorTitle: 'Error',
-      errorMessage: 'There was a problem with the purchase. Please try again.',
-      restoreSuccess: 'Purchases restored!',
-      restoreError: 'No previous purchases found',
-      noProductsError: 'Could not load products. Check your connection.',
+      errorMessage: 'Could not open browser. Visit chyrris.com/caymus-tanks/subscribe from your browser.',
     },
   };
 
   const strings = t[language];
 
-  // Inicializar IAP al montar el componente
   useEffect(() => {
-    initializeSubscription();
-    return () => {
-      // Cleanup se maneja en el servicio
-    };
+    loadUserPhone();
   }, []);
 
-  const initializeSubscription = async () => {
+  const loadUserPhone = async () => {
     try {
-      setIsInitializing(true);
-      
-      // Inicializar IAP
-      const initialized = await initializeIAP();
-      if (!initialized) {
-        setError(strings.noProductsError);
-        setIsInitializing(false);
-        return;
-      }
-
-      // Obtener productos para mostrar el precio real
-      const products = await getSubscriptionProducts();
-      if (products.length > 0) {
-        setProductPrice(products[0].price);
-      }
-
-      // Configurar listener de compras
-      const subscription = setPurchaseListener(handlePurchaseUpdate);
-
-      setIsInitializing(false);
-    } catch (err) {
-      console.error('Error initializing subscription:', err);
-      setError(strings.noProductsError);
-      setIsInitializing(false);
+      const phone = await AsyncStorage.getItem('userPhone');
+      if (phone) setUserPhone(phone);
+    } catch (e) {
+      console.error('Error loading phone:', e);
     }
   };
 
-  const handlePurchaseUpdate = async (purchase: InAppPurchase) => {
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      console.log('Purchase update received:', purchase);
-
-      // Validar el recibo con el backend
-      const isValid = await validateReceipt(purchase);
-
-      if (isValid) {
-        // Finalizar la transacción
-        await finishTransaction(purchase);
-
-        // Notificar que la suscripción está activa
-        Alert.alert(
-          language === 'es' ? '¡Éxito!' : 'Success!',
-          language === 'es' 
-            ? '¡Tu suscripción está activa! Disfruta de Caymus Pro.'
-            : 'Your subscription is active! Enjoy Caymus Pro.',
-          [
-            {
-              text: 'OK',
-              onPress: () => onSubscriptionActivated(),
-            },
-          ]
-        );
-      } else {
-        setError(strings.errorMessage);
-        setIsLoading(false);
-      }
-    } catch (err) {
-      console.error('Error handling purchase:', err);
-      setError(strings.errorMessage);
-      setIsLoading(false);
-    }
-  };
-
+  /**
+   * Abre el navegador con la página de suscripción.
+   */
   const handleSubscribe = async () => {
     try {
       setIsLoading(true);
-      setError(null);
-
-      const result = await purchaseSubscription();
-
-      if (!result.success) {
-        if (result.error !== 'Compra cancelada') {
-          setError(result.error || strings.errorMessage);
-        }
-        setIsLoading(false);
+      const lang = language === 'es' ? 'es' : 'en';
+      const url = `${SUBSCRIPTION_URL}?phone=${encodeURIComponent(userPhone)}&lang=${lang}`;
+      const canOpen = await Linking.canOpenURL(url);
+      if (canOpen) {
+        await Linking.openURL(url);
+      } else {
+        Alert.alert(strings.errorTitle, strings.errorMessage);
       }
-      // Si es exitoso, el listener manejará el resto
-    } catch (err) {
-      console.error('Error subscribing:', err);
-      setError(strings.errorMessage);
+    } catch (error) {
+      console.error('Error opening subscription URL:', error);
+      Alert.alert(strings.errorTitle, strings.errorMessage);
+    } finally {
       setIsLoading(false);
     }
   };
 
-  const handleRestore = async () => {
+  /**
+   * Verifica si el usuario ya se suscribió consultando el backend.
+   */
+  const handleCheckStatus = async () => {
     try {
-      setIsLoading(true);
-      setError(null);
-
-      const result = await restorePurchases();
-
-      if (result.success) {
+      setIsCheckingStatus(true);
+      if (!userPhone) {
+        Alert.alert(strings.errorTitle, 'No se encontró tu número de teléfono.');
+        return;
+      }
+      const response = await fetch(
+        `https://chyrris.com/api/users/profile?phone=${encodeURIComponent(userPhone)}`
+      );
+      if (!response.ok) throw new Error('Network error');
+      const data = await response.json();
+      if (data.success && (data.subscriptionStatus === 'active' || data.isOwner)) {
+        await AsyncStorage.setItem('subscriptionStatus', 'active');
+        if (data.subscriptionExpiry) {
+          await AsyncStorage.setItem(
+            'subscriptionExpiry',
+            new Date(data.subscriptionExpiry).getTime().toString()
+          );
+        } else {
+          await AsyncStorage.setItem(
+            'subscriptionExpiry',
+            (Date.now() + 30 * 24 * 60 * 60 * 1000).toString()
+          );
+        }
         Alert.alert(
-          language === 'es' ? '¡Éxito!' : 'Success!',
-          strings.restoreSuccess,
-          [
-            {
-              text: 'OK',
-              onPress: () => onSubscriptionActivated(),
-            },
-          ]
+          strings.activeTitle,
+          strings.activeMessage,
+          [{ text: 'OK', onPress: () => onSubscriptionActivated() }]
         );
       } else {
-        Alert.alert(
-          strings.errorTitle,
-          strings.restoreError
-        );
+        Alert.alert(strings.notActiveTitle, strings.notActiveMessage);
       }
-
-      setIsLoading(false);
-    } catch (err) {
-      console.error('Error restoring purchases:', err);
-      setError(strings.errorMessage);
-      setIsLoading(false);
+    } catch (error) {
+      console.error('Error checking subscription status:', error);
+      Alert.alert(
+        strings.errorTitle,
+        language === 'es'
+          ? 'Error al verificar. Revisa tu conexión e intenta de nuevo.'
+          : 'Verification error. Check your connection and try again.'
+      );
+    } finally {
+      setIsCheckingStatus(false);
     }
   };
 
-  if (isInitializing) {
-    return (
-      <View style={styles.loadingContainer}>
-        <StatusBar style="light" />
-        <ActivityIndicator size="large" color="#00d4ff" />
-        <Text style={styles.loadingText}>
-          {language === 'es' ? 'Cargando...' : 'Loading...'}
-        </Text>
-      </View>
-    );
-  }
+  const features = [
+    strings.feature1,
+    strings.feature2,
+    strings.feature3,
+    strings.feature4,
+    strings.feature5,
+    strings.feature6,
+  ];
 
   return (
     <View style={styles.container}>
@@ -241,26 +200,20 @@ export default function PaywallScreen({
         colors={['#0a1628', '#112240', '#0a1628']}
         style={styles.gradient}
       >
-        <ScrollView 
+        <ScrollView
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
           {/* Header */}
           <View style={styles.header}>
-            <Text style={styles.icon}>💎</Text>
+            <Text style={styles.icon}>🍷</Text>
             <Text style={styles.title}>{strings.title}</Text>
             <Text style={styles.subtitle}>{strings.subtitle}</Text>
           </View>
 
           {/* Features */}
           <View style={styles.featuresContainer}>
-            {[
-              strings.feature1,
-              strings.feature2,
-              strings.feature3,
-              strings.feature4,
-              strings.feature5,
-            ].map((feature, index) => (
+            {features.map((feature, index) => (
               <View key={index} style={styles.featureRow}>
                 <Text style={styles.checkmark}>✓</Text>
                 <Text style={styles.featureText}>{feature}</Text>
@@ -271,23 +224,27 @@ export default function PaywallScreen({
           {/* Pricing Card */}
           <View style={styles.pricingCard}>
             <Text style={styles.priceLabel}>{strings.priceLabel}</Text>
-            <Text style={styles.price}>{productPrice}/mes</Text>
+            <Text style={styles.price}>
+              {strings.price}
+              <Text style={styles.pricePeriod}>/mes</Text>
+            </Text>
             <Text style={styles.renewalInfo}>{strings.autoRenew}</Text>
             <Text style={styles.cancelInfo}>{strings.cancelAnytime}</Text>
           </View>
 
-          {/* Error Message */}
-          {error && (
-            <View style={styles.errorContainer}>
-              <Text style={styles.errorText}>{error}</Text>
-            </View>
-          )}
+          {/* How it works */}
+          <View style={styles.howItWorksContainer}>
+            <Text style={styles.howItWorksTitle}>{strings.howItWorks}</Text>
+            <Text style={styles.howItWorksStep}>{strings.step1}</Text>
+            <Text style={styles.howItWorksStep}>{strings.step2}</Text>
+            <Text style={styles.howItWorksStep}>{strings.step3}</Text>
+          </View>
 
           {/* Subscribe Button */}
           <TouchableOpacity
             style={[styles.subscribeButton, isLoading && styles.buttonDisabled]}
             onPress={handleSubscribe}
-            disabled={isLoading}
+            disabled={isLoading || isCheckingStatus}
           >
             {isLoading ? (
               <ActivityIndicator color="#0a1628" />
@@ -297,21 +254,30 @@ export default function PaywallScreen({
                   {strings.subscribeButton}
                 </Text>
                 <Text style={styles.subscribeButtonSubtext}>
-                  {productPrice}/mes
+                  {strings.price}/mes
                 </Text>
               </>
             )}
           </TouchableOpacity>
 
-          {/* Restore Button */}
+          {/* Check Status Button */}
           <TouchableOpacity
-            style={styles.restoreButton}
-            onPress={handleRestore}
-            disabled={isLoading}
+            style={[styles.checkStatusButton, isCheckingStatus && styles.buttonDisabled]}
+            onPress={handleCheckStatus}
+            disabled={isLoading || isCheckingStatus}
           >
-            <Text style={styles.restoreButtonText}>
-              {strings.restoreButton}
-            </Text>
+            {isCheckingStatus ? (
+              <View style={styles.checkingRow}>
+                <ActivityIndicator color="#00d4ff" size="small" />
+                <Text style={styles.checkStatusButtonText}>
+                  {' '}{strings.checkingStatus}
+                </Text>
+              </View>
+            ) : (
+              <Text style={styles.checkStatusButtonText}>
+                {strings.checkStatusButton}
+              </Text>
+            )}
           </TouchableOpacity>
 
           {/* Terms Note */}
@@ -326,7 +292,6 @@ export default function PaywallScreen({
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -464,15 +429,48 @@ const styles = StyleSheet.create({
     marginTop: 4,
     opacity: 0.8,
   },
-  restoreButton: {
+  pricePeriod: {
+    fontSize: 22,
+    color: '#8892b0',
+    fontWeight: 'normal',
+  },
+  howItWorksContainer: {
+    backgroundColor: 'rgba(17, 34, 64, 0.4)',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: '#1e3a5f',
+  },
+  howItWorksTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#00d4ff',
+    marginBottom: 10,
+  },
+  howItWorksStep: {
+    fontSize: 14,
+    color: '#ccd6f6',
+    marginBottom: 6,
+    lineHeight: 20,
+  },
+  checkStatusButton: {
+    borderWidth: 2,
+    borderColor: '#00d4ff',
+    borderRadius: 12,
     padding: 16,
     alignItems: 'center',
     marginBottom: 20,
+    backgroundColor: 'transparent',
   },
-  restoreButtonText: {
+  checkStatusButtonText: {
     fontSize: 16,
     color: '#00d4ff',
-    textDecorationLine: 'underline',
+    fontWeight: '600',
+  },
+  checkingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   termsNote: {
     fontSize: 12,
