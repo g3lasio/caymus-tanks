@@ -2,7 +2,7 @@
   "expo": {
     "name": "Caymus Tank Calculator",
     "slug": "caymus-tanks",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
@@ -14,7 +14,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.chyrris.caymus-tanks",
-      "buildNumber": "6",
+      "buildNumber": "7",
       "infoPlist": {
         "CFBundleDisplayName": "Caymus Tank Calculator"
       }
@@ -25,7 +25,7 @@
         "backgroundColor": "#0a1628"
       },
       "package": "com.chyrris.caymus_tanks",
-      "versionCode": 6
+      "versionCode": 7
     },
     "web": {
       "favicon": "./assets/favicon.png",
