@@ -14,6 +14,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   KeyboardAvoidingView,
+  ScrollView,
   Platform,
   Image,
   ActivityIndicator,
@@ -165,7 +166,12 @@ export default function LoginScreen({
         <Text style={styles.languageLabel}>EN</Text>
       </View>
 
-      <View style={styles.content}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        bounces={false}
+      >
         {/* Logo */}
         <View style={styles.logoContainer}>
           <Image
@@ -238,12 +244,12 @@ export default function LoginScreen({
             </TouchableOpacity>
           </View>
         </View>
-      </View>
 
-      {/* Footer */}
-      <View style={styles.footer}>
-        <Text style={styles.footerText}>© 2026 Chyrris Technologies</Text>
-      </View>
+        {/* Footer */}
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>© 2026 Chyrris Technologies</Text>
+        </View>
+      </ScrollView>
 
       {/* Modal de usuario no registrado */}
       <Modal
@@ -301,9 +307,10 @@ const styles = StyleSheet.create({
     transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }],
   },
   content: {
-    flex: 1,
+    flexGrow: 1,
     justifyContent: 'center',
     paddingHorizontal: 30,
+    paddingVertical: 30,
   },
   logoContainer: {
     alignItems: 'center',

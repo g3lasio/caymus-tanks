@@ -13,6 +13,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   KeyboardAvoidingView,
+  ScrollView,
   Platform,
   Image,
   ActivityIndicator,
@@ -243,7 +244,12 @@ export default function OTPScreen({
     >
       <StatusBar style="light" />
 
-      <View style={styles.content}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        bounces={false}
+      >
         <View style={styles.logoContainer}>
           <Image
             source={require('../../assets/caymus-logo.jpeg')}
@@ -319,14 +325,14 @@ export default function OTPScreen({
           )}
         </View>
 
-        <TouchableOpacity onPress={onChangeNumber} style={styles.changeNumberButton}>
+         <TouchableOpacity onPress={onChangeNumber} style={styles.changeNumberButton}>
           <Text style={styles.changeNumberText}>{t.changeNumber}</Text>
         </TouchableOpacity>
-      </View>
 
-      <View style={styles.footer}>
-        <Text style={styles.footerText}>© 2026 Chyrris Technologies</Text>
-      </View>
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>© 2026 Chyrris Technologies</Text>
+        </View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }
@@ -337,9 +343,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#0a1628',
   },
   content: {
-    flex: 1,
+    flexGrow: 1,
     justifyContent: 'center',
     paddingHorizontal: 30,
+    paddingVertical: 30,
   },
   logoContainer: {
     alignItems: 'center',
