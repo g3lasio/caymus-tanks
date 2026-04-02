@@ -17,7 +17,9 @@ import {
   Platform,
   Image,
   ActivityIndicator,
-} from 'react-native';
+,
+  SafeAreaView,
+} from \'react-native\';
 import { StatusBar } from 'expo-status-bar';
 import { verifyOTP, sendOTP } from '../services/authService';
 import { Language } from '../i18n/translations';

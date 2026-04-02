@@ -16,7 +16,9 @@ import {
   ActivityIndicator,
   Alert,
   Linking,
-} from 'react-native';
+,
+  SafeAreaView,
+} from \'react-native\';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -339,6 +341,7 @@ export default function PaywallScreen({
           </View>
         </ScrollView>
       </LinearGradient>
+    </SafeAreaView>
     </View>
   );
 }

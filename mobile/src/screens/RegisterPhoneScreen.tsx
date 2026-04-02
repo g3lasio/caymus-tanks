@@ -19,7 +19,9 @@ import {
   ActivityIndicator,
   Switch,
   ScrollView,
-} from 'react-native';
+,
+  SafeAreaView,
+} from \'react-native\';
 import { StatusBar } from 'expo-status-bar';
 import { sendOTPForRegistration } from '../services/authService';
 import { Language } from '../i18n/translations';

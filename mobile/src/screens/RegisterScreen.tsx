@@ -18,7 +18,9 @@ import {
   ScrollView,
   ActivityIndicator,
   Switch,
-} from 'react-native';
+,
+  SafeAreaView,
+} from \'react-native\';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
 import { registerUser, isOwnerPhone } from '../services/authService';
@@ -270,6 +272,7 @@ export default function RegisterScreen({
           </View>
         </ScrollView>
       </LinearGradient>
+    </SafeAreaView>
     </KeyboardAvoidingView>
   );
 }
