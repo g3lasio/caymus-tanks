@@ -15,7 +15,7 @@ import OTPScreen from './screens/OTPScreen';
 import RegisterScreen from './screens/RegisterScreen';
 import PaywallScreen from './screens/PaywallScreen';
 import CalculatorScreen from './screens/CalculatorScreen';
-import { checkSession, logout, isOwnerPhone, SessionInfo } from './services/authService';
+import { checkSession, logout, isOwnerPhone, checkSubscriptionWithBackend, SessionInfo } from './services/authService';
 import { Language, LEGAL_CONTENT } from './i18n/translations';
 
 // Estados de autenticación
@@ -55,8 +55,20 @@ export default function App() {
         // Si está autenticado pero no registrado, ir a registro de perfil
         if (!session.isRegistered) {
           setAuthState('register_profile');
+          return;
+        }
+        
+        // CRITICAL FIX: Verificar suscripción activa con backend (no confiar solo en AsyncStorage)
+        if (session.phone) {
+          const subCheck = await checkSubscriptionWithBackend(session.phone);
+          if (subCheck.hasAccess) {
+            setAuthState('authenticated');
+          } else {
+            // No tiene suscripción activa → mostrar paywall
+            setAuthState('paywall');
+          }
         } else {
-          setAuthState('authenticated');
+          setAuthState('paywall');
         }
       } else {
         // Por defecto, mostrar login (usuarios existentes)
@@ -124,15 +136,27 @@ export default function App() {
     // Si es usuario nuevo o no tiene nombre, ir a registro de perfil
     if (verifyResult.isNewUser || !verifyResult.userName) {
       setAuthState('register_profile');
-    } else {
-      // Usuario existente con nombre, mostrar bienvenida
+      return;
+    }
+    
+    // Usuario existente con nombre: verificar suscripción con backend
+    if (verifyResult.isOwner) {
+      // Propietario: acceso directo
       setShowWelcome(true);
       setAuthState('authenticated');
-      
-      // Ocultar bienvenida después de 3 segundos
-      setTimeout(() => {
-        setShowWelcome(false);
-      }, 3000);
+      setTimeout(() => setShowWelcome(false), 3000);
+      return;
+    }
+    
+    // Usuario normal: verificar suscripción activa en el backend
+    const subCheck = await checkSubscriptionWithBackend(phoneNumber);
+    if (subCheck.hasAccess) {
+      setShowWelcome(true);
+      setAuthState('authenticated');
+      setTimeout(() => setShowWelcome(false), 3000);
+    } else {
+      // Sin suscripción activa → paywall
+      setAuthState('paywall');
     }
   };
 

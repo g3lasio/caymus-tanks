@@ -762,6 +762,77 @@ export const checkSubscription = async (): Promise<{
   }
 };
 
+
+/**
+ * Verifica la suscripción activa consultando el backend.
+ * NO confía solo en AsyncStorage local (puede ser bypasseado).
+ * Retorna el estado de suscripción y si tiene acceso.
+ */
+export const checkSubscriptionWithBackend = async (phone: string): Promise<{
+  hasAccess: boolean;
+  subscriptionStatus: 'none' | 'pending' | 'active' | 'expired' | 'past_due' | 'cancelled';
+  isOwner: boolean;
+  manageUrl?: string;
+}> => {
+  try {
+    const formattedPhone = phone.startsWith('+') ? phone : `+${phone}`;
+    const response = await fetch(
+      `${API_BASE_URL}/users/profile?phone=${encodeURIComponent(formattedPhone)}`
+    );
+    
+    if (response.ok) {
+      const data = await response.json();
+      if (data.success) {
+        const isOwner = data.isOwner || false;
+        const status = data.subscriptionStatus || 'none';
+        
+        // Propietarios siempre tienen acceso
+        if (isOwner) {
+          return {
+            hasAccess: true,
+            subscriptionStatus: 'active',
+            isOwner: true,
+          };
+        }
+        
+        // Usuarios normales: solo tienen acceso si subscriptionStatus === 'active'
+        const hasAccess = status === 'active';
+        
+        // Construir URL de gestión si tiene customerId
+        const manageUrl = hasAccess || status === 'past_due'
+          ? `https://chyrris.com/api/stripe/customer-portal?phone=${encodeURIComponent(formattedPhone)}`
+          : undefined;
+        
+        return {
+          hasAccess,
+          subscriptionStatus: status,
+          isOwner: false,
+          manageUrl,
+        };
+      }
+    }
+    
+    // Error de red o backend: usar estado local como fallback
+    const localStatus = await AsyncStorage.getItem(STORAGE_KEYS.SUBSCRIPTION_STATUS);
+    const isOwner = await AsyncStorage.getItem(STORAGE_KEYS.IS_OWNER);
+    return {
+      hasAccess: localStatus === 'active' || isOwner === 'true',
+      subscriptionStatus: (localStatus as any) || 'none',
+      isOwner: isOwner === 'true',
+    };
+  } catch (error) {
+    console.error('Error checking subscription with backend:', error);
+    // Error de red: usar estado local como fallback
+    const localStatus = await AsyncStorage.getItem(STORAGE_KEYS.SUBSCRIPTION_STATUS);
+    const isOwner = await AsyncStorage.getItem(STORAGE_KEYS.IS_OWNER);
+    return {
+      hasAccess: localStatus === 'active' || isOwner === 'true',
+      subscriptionStatus: (localStatus as any) || 'none',
+      isOwner: isOwner === 'true',
+    };
+  }
+};
+
 // ============================================================================
 // EXPORTACIONES
 // ============================================================================
@@ -781,4 +852,5 @@ export default {
   isOwnerPhone,
   isPhoneRegistered,
   checkSubscription,
+  checkSubscriptionWithBackend,
 };

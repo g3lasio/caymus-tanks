@@ -137,6 +137,7 @@ export default function PaywallScreen({
 
   /**
    * Verifica si el usuario ya se suscribió consultando el backend.
+   * Si el pago falló (past_due), muestra mensaje con link de gestión.
    */
   const handleCheckStatus = async () => {
     try {
@@ -150,24 +151,73 @@ export default function PaywallScreen({
       );
       if (!response.ok) throw new Error('Network error');
       const data = await response.json();
-      if (data.success && (data.subscriptionStatus === 'active' || data.isOwner)) {
-        await AsyncStorage.setItem('subscriptionStatus', 'active');
-        if (data.subscriptionExpiry) {
-          await AsyncStorage.setItem(
-            'subscriptionExpiry',
-            new Date(data.subscriptionExpiry).getTime().toString()
+      
+      if (data.success) {
+        const status = data.subscriptionStatus;
+        
+        // Usuario con acceso activo (active o owner)
+        if (status === 'active' || data.isOwner) {
+          await AsyncStorage.setItem('subscriptionStatus', 'active');
+          if (data.subscriptionExpiry) {
+            await AsyncStorage.setItem(
+              'subscriptionExpiry',
+              new Date(data.subscriptionExpiry).getTime().toString()
+            );
+          } else {
+            await AsyncStorage.setItem(
+              'subscriptionExpiry',
+              (Date.now() + 30 * 24 * 60 * 60 * 1000).toString()
+            );
+          }
+          Alert.alert(
+            strings.activeTitle,
+            strings.activeMessage,
+            [{ text: 'OK', onPress: () => onSubscriptionActivated() }]
           );
-        } else {
-          await AsyncStorage.setItem(
-            'subscriptionExpiry',
-            (Date.now() + 30 * 24 * 60 * 60 * 1000).toString()
-          );
+          return;
         }
-        Alert.alert(
-          strings.activeTitle,
-          strings.activeMessage,
-          [{ text: 'OK', onPress: () => onSubscriptionActivated() }]
-        );
+        
+        // Pago fallido (tarjeta declinada)
+        if (status === 'past_due') {
+          Alert.alert(
+            language === 'es' ? 'Pago Fallido' : 'Payment Failed',
+            language === 'es' 
+              ? 'Tu último pago no pudo procesarse. Por favor actualiza tu método de pago.'
+              : 'Your last payment could not be processed. Please update your payment method.',
+            [
+              { text: language === 'es' ? 'Cancelar' : 'Cancel', style: 'cancel' },
+              {
+                text: language === 'es' ? 'Gestionar Suscripción' : 'Manage Subscription',
+                onPress: () => {
+                  const manageUrl = `https://chyrris.com/api/stripe/customer-portal?phone=${encodeURIComponent(userPhone)}`;
+                  Linking.openURL(manageUrl);
+                },
+              },
+            ]
+          );
+          return;
+        }
+        
+        // Suscripción cancelada o expirada
+        if (status === 'cancelled' || status === 'expired') {
+          Alert.alert(
+            language === 'es' ? 'Suscripción Inactiva' : 'Inactive Subscription',
+            language === 'es'
+              ? 'Tu suscripción ha sido cancelada o expiró. Suscríbete nuevamente para continuar.'
+              : 'Your subscription was cancelled or expired. Subscribe again to continue.',
+            [
+              { text: 'OK', style: 'cancel' },
+              {
+                text: language === 'es' ? 'Suscribirse' : 'Subscribe',
+                onPress: handleSubscribe,
+              },
+            ]
+          );
+          return;
+        }
+        
+        // Sin suscripción (none o pending)
+        Alert.alert(strings.notActiveTitle, strings.notActiveMessage);
       } else {
         Alert.alert(strings.notActiveTitle, strings.notActiveMessage);
       }
@@ -182,7 +232,7 @@ export default function PaywallScreen({
     } finally {
       setIsCheckingStatus(false);
     }
-  };
+  };;
 
   const features = [
     strings.feature1,
